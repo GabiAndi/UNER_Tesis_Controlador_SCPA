@@ -1,6 +1,6 @@
 # Configuración de Qt
 QT -= gui
-QT += core
+QT += core network
 
 # Configuración del proyecto
 CONFIG += c++11 console
@@ -12,4 +12,10 @@ INSTALLS += target
 
 # Archivos de recursos
 SOURCES += \
-        main.cpp
+        hmimanager.cpp \
+        main.cpp \
+        scpamanager.cpp
+
+HEADERS += \
+        hmimanager.h \
+        scpamanager.h
