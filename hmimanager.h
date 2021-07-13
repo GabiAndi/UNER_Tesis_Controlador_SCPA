@@ -14,12 +14,10 @@
 #define HMIMANAGER_H
 
 #include <QObject>
-#include <QThread>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QList>
 
-class HMIManager : public QThread
+class HMIManager : public QObject
 {
         Q_OBJECT
 
@@ -27,15 +25,19 @@ class HMIManager : public QThread
         explicit HMIManager(QObject *parent = nullptr);
         ~HMIManager();
 
-    protected:
-        void run() override;
-
     private:
+        // Conexiones
         QTcpServer *hmiServer = nullptr;
         QTcpSocket *hmiClient = nullptr;
 
+        // Cliente
+        void clientDisconnected();
+        void clientReadData();
+
     public slots:
+        // Conexiones
         void newConnection();
+        void newConnectionError(const QAbstractSocket::SocketError socketError);
 };
 
 #endif // HMIMANAGER_H

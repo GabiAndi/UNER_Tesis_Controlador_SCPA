@@ -18,9 +18,6 @@ int main(int argc, char *argv[])
     // Intancia la clase controladora principal
     SCPAManager *scpaManager = new SCPAManager;
 
-    // Da de alta el controlador
-    scpaManager->start();
-
     // Bucle infinito
     int exit = a.exec();
 

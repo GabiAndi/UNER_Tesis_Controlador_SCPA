@@ -1,40 +1,56 @@
 #include "hmimanager.h"
 
-HMIManager::HMIManager(QObject *parent) : QThread(parent)
-{
-
-}
-
-HMIManager::~HMIManager()
-{
-    // Se elimina el cliente
-    delete hmiClient;
-}
-
-void HMIManager::run()
+HMIManager::HMIManager(QObject *parent) : QObject(parent)
 {
     // Inicializacion
     hmiServer = new QTcpServer();
 
     connect(hmiServer, &QTcpServer::newConnection, this, &HMIManager::newConnection);
+    connect(hmiServer, &QTcpServer::acceptError, this, &HMIManager::newConnectionError);
 
-    hmiServer->listen(QHostAddress::AnyIPv4, 33600);
-
-    while (true)
+    if (hmiServer->listen(QHostAddress::AnyIPv4, 33600))
     {
-        if (hmiServer->hasPendingConnections())
-        {
-            hmiClient = hmiServer->nextPendingConnection();
-
-            hmiClient->open(QIODevice::ReadWrite);
-        }
+        qInfo() << "Servidor HMI iniciado";
     }
 
-    // Se eliminar el servidor TCP
+    else
+    {
+        qCritical() << "Servidor HMI error";
+    }
+}
+
+HMIManager::~HMIManager()
+{
+    delete hmiClient;
     delete hmiServer;
 }
 
 void HMIManager::newConnection()
 {
-    qDebug() << "Conexión nueva en espera.";
+    qInfo() << "Nueva conexión entrante";
+
+    hmiClient = hmiServer->nextPendingConnection();
+
+    connect(hmiClient, &QTcpSocket::readyRead, this, &HMIManager::clientReadData);
+    connect(hmiClient, &QTcpSocket::disconnected, this, &HMIManager::clientDisconnected);
+}
+
+void HMIManager::newConnectionError(const QAbstractSocket::SocketError socketError)
+{
+    qCritical() << "Error en la conexión entrante: " << socketError;
+}
+
+void HMIManager::clientDisconnected()
+{
+     qInfo() << "Cliente desconectado";
+
+     disconnect(hmiClient, &QTcpSocket::readyRead, this, &HMIManager::clientReadData);
+     disconnect(hmiClient, &QTcpSocket::disconnected, this, &HMIManager::clientDisconnected);
+}
+
+void HMIManager::clientReadData()
+{
+    QByteArray data = hmiClient->readAll();
+
+    qInfo() << QString(data);
 }

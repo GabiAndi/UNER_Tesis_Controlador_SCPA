@@ -23,13 +23,6 @@ class SCPAManager : public QObject
         explicit SCPAManager();
         ~SCPAManager();
 
-        void start();
-
-    public slots:
-        // Control del HMI manager
-        void hmiManagerThreadStarted();
-        void hmiManagerThreadFinished();
-
     private:
         HMIManager *hmiManager = nullptr;
 };
