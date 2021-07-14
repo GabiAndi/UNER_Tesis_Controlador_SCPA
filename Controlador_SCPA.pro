@@ -12,10 +12,12 @@ INSTALLS += target
 
 # Archivos de recursos
 SOURCES += \
+        hmiclient.cpp \
         hmimanager.cpp \
         main.cpp \
         scpamanager.cpp
 
 HEADERS += \
+        hmiclient.h \
         hmimanager.h \
         scpamanager.h

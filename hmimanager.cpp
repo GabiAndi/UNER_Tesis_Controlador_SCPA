@@ -2,7 +2,7 @@
 
 HMIManager::HMIManager(QObject *parent) : QObject(parent)
 {
-    // Inicializacion
+    // Inicializacion del servidor
     hmiServer = new QTcpServer();
 
     connect(hmiServer, &QTcpServer::newConnection, this, &HMIManager::newConnection);
@@ -17,22 +17,65 @@ HMIManager::HMIManager(QObject *parent) : QObject(parent)
     {
         qCritical() << "Servidor HMI error";
     }
+
+    // Inicialización del cliente
+    hmiClients = new QList<HMIClient *>();
 }
 
 HMIManager::~HMIManager()
 {
-    delete hmiClient;
     delete hmiServer;
+
+    for (int i = 0; i < hmiClients->length() ; i++)
+    {
+        hmiClients->at(i)->hmiClientDisconect();
+    }
+
+    delete hmiClients;
 }
 
 void HMIManager::newConnection()
 {
     qInfo() << "Nueva conexión entrante";
 
-    hmiClient = hmiServer->nextPendingConnection();
+    bool hmiAceptNewConnection = true;
+    int newId = 0;
 
-    connect(hmiClient, &QTcpSocket::readyRead, this, &HMIManager::clientReadData);
-    connect(hmiClient, &QTcpSocket::disconnected, this, &HMIManager::clientDisconnected);
+    for (newId = 0 ; newId < hmiClientsMax ; newId++)
+    {
+        hmiAceptNewConnection = true;
+
+        for (int i = 0 ; i < hmiClients->length() ; i++)
+        {
+            if (hmiClients->at(i)->getId() == newId)
+            {
+                hmiAceptNewConnection = false;
+
+                break;
+            }
+        }
+
+        if (hmiAceptNewConnection)
+        {
+            break;
+        }
+    }
+
+    if (hmiAceptNewConnection)
+    {
+        qInfo() << "Conexión aceptada";
+
+        HMIClient *newClient = new HMIClient(this, hmiServer->nextPendingConnection(), newId);
+
+        hmiClients->append(newClient);
+
+        connect(newClient, &HMIClient::closed, this, &HMIManager::hmiClientDisconnected);
+    }
+
+    else
+    {
+        qInfo() << "Conexión rechasada";
+    }
 }
 
 void HMIManager::newConnectionError(const QAbstractSocket::SocketError socketError)
@@ -40,17 +83,9 @@ void HMIManager::newConnectionError(const QAbstractSocket::SocketError socketErr
     qCritical() << "Error en la conexión entrante: " << socketError;
 }
 
-void HMIManager::clientDisconnected()
+void HMIManager::hmiClientDisconnected(HMIClient *hmiClient)
 {
-     qInfo() << "Cliente desconectado";
+    hmiClients->removeOne(hmiClient);
 
-     disconnect(hmiClient, &QTcpSocket::readyRead, this, &HMIManager::clientReadData);
-     disconnect(hmiClient, &QTcpSocket::disconnected, this, &HMIManager::clientDisconnected);
-}
-
-void HMIManager::clientReadData()
-{
-    QByteArray data = hmiClient->readAll();
-
-    qInfo() << QString(data);
+    disconnect(hmiClient, &HMIClient::closed, this, &HMIManager::hmiClientDisconnected);
 }

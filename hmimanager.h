@@ -16,6 +16,9 @@
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QList>
+
+#include "hmiclient.h"
 
 class HMIManager : public QObject
 {
@@ -28,16 +31,17 @@ class HMIManager : public QObject
     private:
         // Conexiones
         QTcpServer *hmiServer = nullptr;
-        QTcpSocket *hmiClient = nullptr;
 
-        // Cliente
-        void clientDisconnected();
-        void clientReadData();
+        QList<HMIClient *> *hmiClients = nullptr;
+
+        uint8_t hmiClientsMax = 5;  // Numero maximo de sesiones por defecto
 
     public slots:
         // Conexiones
         void newConnection();
         void newConnectionError(const QAbstractSocket::SocketError socketError);
+
+        void hmiClientDisconnected(HMIClient *hmiClient);
 };
 
 #endif // HMIMANAGER_H
