@@ -15,9 +15,11 @@ SOURCES += \
         hmiclient.cpp \
         hmimanager.cpp \
         main.cpp \
-        scpamanager.cpp
+        scpamanager.cpp \
+        scpaprotocol.cpp
 
 HEADERS += \
         hmiclient.h \
         hmimanager.h \
-        scpamanager.h
+        scpamanager.h \
+        scpaprotocol.h

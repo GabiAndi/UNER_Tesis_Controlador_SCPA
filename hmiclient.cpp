@@ -2,8 +2,10 @@
 
 HMIClient::HMIClient(QObject *parent, QTcpSocket *hmiClient, int id) : QObject(parent)
 {
+    // Inicialización del cliente
     if (hmiClient != nullptr)
     {
+        // Socket e ID
         this->hmiClient = hmiClient;
         this->id = id;
 
@@ -17,6 +19,9 @@ HMIClient::HMIClient(QObject *parent, QTcpSocket *hmiClient, int id) : QObject(p
 
         qInfo() << "Cliente creado";
         qInfo() << "ID: " << id;
+
+        // Protocolo de comunicación
+        scpaProtocol = new SCPAProtocol(this);
     }
 }
 
@@ -38,7 +43,6 @@ int HMIClient::getId()
     return id;
 }
 
-
 void HMIClient::hmiClientDisconnected()
 {
     deleteLater();
@@ -51,7 +55,6 @@ void HMIClient::hmiClientDisconnected()
 
 void HMIClient::hmiClientReadData()
 {
-    QByteArray data = hmiClient->readAll();
-
-    qInfo() << "Cliente " << id << ": " << QString(data);
+    // Lectura de los datos pendientes
+    scpaProtocol->readProtocol(hmiClient->readAll());
 }

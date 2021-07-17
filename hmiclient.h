@@ -14,6 +14,8 @@
 #include <QDebug>
 #include <QTcpSocket>
 
+#include "scpaprotocol.h"
+
 class HMIClient : public QObject
 {
         Q_OBJECT
@@ -29,7 +31,9 @@ class HMIClient : public QObject
     private:
         QTcpSocket *hmiClient = nullptr;
 
-        int id = -1;
+        int id = -1;    // ID asignado al cliente
+
+        SCPAProtocol *scpaProtocol = nullptr;
 
     private slots:
         void hmiClientDisconnected();
