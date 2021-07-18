@@ -2,7 +2,7 @@
 
 SCPAProtocol::SCPAProtocol(QObject *parent) : QThread(parent)
 {
-    // Se instancia el timer
+    // Se instancia el timer de timeout
     packageTimeOut = new QTimer(this);
 
     connect(packageTimeOut, &QTimer::timeout, this, &SCPAProtocol::packageTimeOutTrigger);
@@ -15,102 +15,120 @@ SCPAProtocol::~SCPAProtocol()
 
 void SCPAProtocol::readProtocol(const QByteArray dataToRead)
 {
-    pendingDataToRead.append(dataToRead);
+    // Si el buffer no esta lleno se añaden los paquetes
+    if ((pendingDataToRead.length()) <= (PACKAGE_MAX_LENGTH * 1024))
+    {
+        pendingDataToRead.append(dataToRead);
+    }
 
+    // Si el hilo de analisis de los datos pendientes no se esta ejecutando se ejecuta
     if (!isRunning())
     {
         start();
     }
 }
 
+uint8_t SCPAProtocol::checksum(QByteArray *data)
+{
+    uint8_t dataXor = 0;
+
+    for (uint16_t i = 0 ; i < data->length() ; i++)
+    {
+        dataXor ^= data->at(i);
+    }
+
+    return dataXor;
+}
+
 void SCPAProtocol::run()
 {
-    // Verifica si el paquete se recibio completamente
-    uint16_t lengthPackage = 0;
-
-    // Mientras haya datos disponibles por leer
+    // Mientras haya datos por leer
     while (!pendingDataToRead.isEmpty())
     {
-        qInfo() << pendingDataToRead.at(0);
-
-        // Analisis del paquete
         switch (packageState)
         {
             // +
             case 0:
-                if (pendingDataToRead.at(0) == '+')
+                if (pendingDataToRead.at(packageReadIndex++) == '+')
                 {
                     packageState++;
+
+                    packageTimeOut->start(PACKAGE_MAX_TIMEOUT_MS);
+                }
+
+                else
+                {
+                    packageReset();
                 }
 
                 break;
 
             // S
             case 1:
-                if (pendingDataToRead.at(0) == 'S')
+                if (pendingDataToRead.at(packageReadIndex++) == 'S')
                 {
                     packageState++;
                 }
 
                 else
                 {
-                    packageState = 0;
+                    packageReset();
                 }
 
                 break;
 
             // C
             case 2:
-                if (pendingDataToRead.at(0) == 'C')
+                if (pendingDataToRead.at(packageReadIndex++) == 'C')
                 {
                     packageState++;
                 }
 
                 else
                 {
-                    packageState = 0;
+                    packageReset();
                 }
 
                 break;
 
             // P
             case 3:
-                if (pendingDataToRead.at(0) == 'P')
+                if (pendingDataToRead.at(packageReadIndex++) == 'P')
                 {
                     packageState++;
                 }
 
                 else
                 {
-                    packageState = 0;
+                    packageReset();
                 }
 
                 break;
 
             // A
             case 4:
-                if (pendingDataToRead.at(0) == 'A')
+                if (pendingDataToRead.at(packageReadIndex++) == 'A')
                 {
                     packageState++;
                 }
 
                 else
                 {
-                    packageState = 0;
+                    packageReset();
                 }
 
                 break;
 
             // :
             case 5:
-                if (pendingDataToRead.at(0) == ':')
+                if (pendingDataToRead.at(packageReadIndex++) == ':')
                 {
                     packageState++;
                 }
 
                 else
                 {
-                    packageState = 0;
+                    packageReset();
                 }
 
                 break;
@@ -119,7 +137,9 @@ void SCPAProtocol::run()
             case 6:
                 packageState++;
 
-                pendingPackageToRead.append(pendingDataToRead.at(0));
+                pendingPackageToRead.info = pendingDataToRead.at(packageReadIndex);
+
+                packageReadIndex++;
 
                 break;
 
@@ -127,7 +147,19 @@ void SCPAProtocol::run()
             case 7:
                 packageState++;
 
-                pendingPackageToRead.append(pendingDataToRead.at(0));
+                // Paquete en formato LITTLEENDIAN
+                if (packageInfo & INFO::F)
+                {
+                    packagePayloadLength = (uint16_t)(pendingDataToRead.at(packageReadIndex) << 7);
+                }
+
+                // Paquete en formato BIGENDIAN
+                else
+                {
+                    packagePayloadLength = (uint16_t)(pendingDataToRead.at(packageReadIndex));
+                }
+
+                packageReadIndex++;
 
                 break;
 
@@ -135,17 +167,19 @@ void SCPAProtocol::run()
             case 8:
                 packageState++;
 
-                pendingPackageToRead.append(pendingDataToRead.at(0));
-
-                if ((pendingPackageToRead.at(0) & (1 << 7)) == 0)
+                // Paquete en formato LITTLEENDIAN
+                if (packageInfo & INFO::F)
                 {
-                    lengthPackage = ((uint8_t)(pendingDataToRead.at(1))) | ((uint8_t)(pendingDataToRead.at(2)) << 8);
+                    packagePayloadLength |= (uint16_t)(pendingDataToRead.at(packageReadIndex));
                 }
 
+                // Paquete en formato BIGENDIAN
                 else
                 {
-                    lengthPackage = ((uint8_t)(pendingDataToRead.at(1)) << 8) | ((uint8_t)(pendingDataToRead.at(2)));
+                    packagePayloadLength |= (uint16_t)(pendingDataToRead.at(packageReadIndex) << 7);
                 }
+
+                packageReadIndex++;
 
                 break;
 
@@ -153,27 +187,84 @@ void SCPAProtocol::run()
             case 9:
                 packageState++;
 
-                pendingPackageToRead.append(pendingDataToRead.at(0));
+                pendingPackageToRead.cmd = pendingDataToRead.at(packageReadIndex);
+
+                packageReadIndex++;
 
                 break;
 
-            // PAYL
+            // Payload
             case 10:
-                packageState++;
+                if (packagePayloadLength > 0)
+                {
+                    pendingPackageToRead.payload.append(pendingDataToRead.at(packageReadIndex));
+                    packagePayloadLength--;
+                }
 
+                else
+                {
+                    packageState++;
+                }
+
+                packageReadIndex++;
+
+                break;
+
+            // Checksum
+            case 11:
+                // Si el paquete viene con checksum y es igual
+                if ((pendingDataToRead.at(packageReadIndex) == checksum(&pendingPackageToRead.payload)) ||
+                    !(pendingPackageToRead.info & INFO::C))
+                {
+                    packageState++;
+                }
+
+                else
+                {
+                    packageReset();
+
+                    qInfo() << "El checksum del paquete no coincide";
+                }
+
+                break;
+
+            // Analisis del paquete
+            case 12:
+                packageReset();
+
+                break;
+
+            default:
+                qCritical() << "Esto no debería estar ocurriendo";
 
                 break;
         }
-
-        // Una vez leido el dato se elimina de los bytes pendientes por leer
-        pendingDataToRead.remove(0, 1);
     }
+}
 
-    qInfo() << "Paquete listo para analizar";
-    qInfo() << pendingPackageToRead;
+void SCPAProtocol::packageReset()
+{
+    packageTimeOut->stop();
+
+    pendingDataToRead.remove(0, packageReadIndex + 1);
+
+    pendingPackageToRead.cmd = 0x00;
+    pendingPackageToRead.payload.clear();
+
+    packageState = 0;
+    packageReadIndex = 0;
+    packageInfo = 0;
+    packagePayloadLength = 0;
+}
+
+void SCPAProtocol::packageRead(const scpaPackage_t paquete)
+{
+
 }
 
 void SCPAProtocol::packageTimeOutTrigger()
 {
+    packageReset();
 
+    qWarning() << "TimeOut paquete";
 }
