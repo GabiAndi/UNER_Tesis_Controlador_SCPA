@@ -13,7 +13,7 @@
 
 #include <QObject>
 
-#include "hmimanager.h"
+#include "hmithread.h"
 
 class SCPAManager : public QObject
 {
@@ -23,8 +23,10 @@ class SCPAManager : public QObject
         explicit SCPAManager();
         ~SCPAManager();
 
+        void start();
+
     private:
-        HMIManager *hmiManager = nullptr;
+        HMIThread *hmiThread = nullptr;
 };
 
 #endif // SCPAMANAGER_H

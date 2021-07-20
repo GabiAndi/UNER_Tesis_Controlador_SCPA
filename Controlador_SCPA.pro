@@ -6,7 +6,7 @@ QT += core network
 CONFIG += c++11 console
 CONFIG -= app_bundle
 
-# Configuración de la instalación
+# Configuración del deploy
 target.path = /home/pi/$${TARGET}/bin
 INSTALLS += target
 
@@ -14,6 +14,7 @@ INSTALLS += target
 SOURCES += \
         hmiclient.cpp \
         hmimanager.cpp \
+        hmithread.cpp \
         main.cpp \
         scpamanager.cpp \
         scpaprotocol.cpp
@@ -21,5 +22,6 @@ SOURCES += \
 HEADERS += \
         hmiclient.h \
         hmimanager.h \
+        hmithread.h \
         scpamanager.h \
         scpaprotocol.h

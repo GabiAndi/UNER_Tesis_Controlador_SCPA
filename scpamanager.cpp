@@ -3,11 +3,16 @@
 SCPAManager::SCPAManager()
 {
     // Instancia los servicios
-    hmiManager = new HMIManager(this);
+    hmiThread = new HMIThread(this);    // Servidor de HMI
 }
 
 SCPAManager::~SCPAManager()
 {
-    // Elimina la memoria dinamica utilizada
-    delete hmiManager;
+
+}
+
+void SCPAManager::start()
+{
+    // Inicio de los servicios
+    hmiThread->start(); // Servidor de HMI
 }

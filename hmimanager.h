@@ -30,9 +30,9 @@ class HMIManager : public QObject
 
     private:
         // Conexiones
-        QTcpServer *hmiServer = nullptr;
+        QTcpServer *hmiServer = nullptr;    // Servidor HMI
 
-        QList<HMIClient *> *hmiClients = nullptr;   // Sesiones activas
+        QList<HMIClient *> *hmiClients = nullptr;   // Sesiones activas HMI
 
         uint8_t hmiClientsMax = 5;  // Numero maximo de sesiones por defecto
 

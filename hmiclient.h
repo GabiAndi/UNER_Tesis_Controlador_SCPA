@@ -37,7 +37,6 @@ class HMIClient : public QObject
 
     private slots:
         void hmiClientDisconnected();
-
         void hmiClientReadData();
 
     signals:

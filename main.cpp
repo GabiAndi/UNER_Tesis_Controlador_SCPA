@@ -16,7 +16,9 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
     // Intancia la clase controladora principal
-    SCPAManager *scpaManager = new SCPAManager;
+    SCPAManager *scpaManager = new SCPAManager();
+
+    scpaManager->start();
 
     // Bucle infinito
     int exit = a.exec();
