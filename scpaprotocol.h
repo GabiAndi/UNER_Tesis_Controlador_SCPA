@@ -1,3 +1,11 @@
+/*************************************************************/
+/* AUTOR: GabiAndi                                           */
+/* FECHA: 20/07/2021                                         */
+/*                                                           */
+/* DESCRIPCION:                                              */
+/* Clase que controla el protocolo de comunicación propio.   */
+/*************************************************************/
+
 #ifndef SCPAPROTOCOL_H
 #define SCPAPROTOCOL_H
 
@@ -5,9 +13,6 @@
 #include <QByteArray>
 #include <QTimer>
 #include <QDebug>
-
-#define PACKAGE_MAX_LENGTH                  1       // Tamaño maximo en kilobytes del buffer de lectura
-#define PACKAGE_MAX_TIMEOUT_MS              100     // Tiempo maximo de espera para la recepción completa de un paquete
 
 class SCPAProtocol : public QThread
 {
@@ -17,8 +22,17 @@ class SCPAProtocol : public QThread
         explicit SCPAProtocol(QObject *parent = nullptr);
         ~SCPAProtocol();
 
+        enum INFO
+        {
+            C = (1 << 6),
+            F = (1 << 7)
+        };
+
         void readProtocol(const QByteArray dataToRead);
         static uint8_t checksum(QByteArray *data);
+
+        static const uint16_t PACKAGE_MAX_LENGTH = 1;  // Tamaño maximo en kilobytes del buffer de lectura
+        static const uint16_t PACKAGE_MAX_TIMEOUT_MS = 100;    // Tiempo maximo de espera para la recepción completa de un paquete
 
     protected:
         void run() override;
@@ -26,16 +40,11 @@ class SCPAProtocol : public QThread
     private:
         QByteArray pendingDataToRead;
 
-        enum INFO
-        {
-            C = (1 << 6),
-            F = (1 << 7)
-        };
-
         uint8_t packageState = 0;
         uint16_t packageReadIndex = 0;
         uint8_t packageInfo = 0;
         uint16_t packagePayloadLength = 0;
+
         QTimer *packageTimeOut = nullptr;
 
         typedef struct scpaPackage

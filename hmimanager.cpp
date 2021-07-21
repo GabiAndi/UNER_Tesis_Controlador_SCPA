@@ -69,7 +69,7 @@ void HMIManager::newConnection()
 
         hmiClients->append(newClient);
 
-        connect(newClient, &HMIClient::closed, this, &HMIManager::hmiClientDisconnected);
+        connect(newClient, &HMIClient::hmiClientClosed, this, &HMIManager::hmiClientDisconnected);
     }
 
     else
@@ -87,5 +87,5 @@ void HMIManager::hmiClientDisconnected(HMIClient *hmiClient)
 {
     hmiClients->removeOne(hmiClient);
 
-    disconnect(hmiClient, &HMIClient::closed, this, &HMIManager::hmiClientDisconnected);
+    disconnect(hmiClient, &HMIClient::hmiClientClosed, this, &HMIManager::hmiClientDisconnected);
 }

@@ -35,12 +35,18 @@ class HMIClient : public QObject
 
         SCPAProtocol *scpaProtocol = nullptr;
 
+        bool closing = false;
+        void closeThisClient();
+
     private slots:
         void hmiClientDisconnected();
         void hmiClientReadData();
 
+        void scpaProtocolThreadStart();
+        void scpaProtocolThreadStop();
+
     signals:
-        void closed(HMIClient *thisClient);
+        void hmiClientClosed(HMIClient *thisClient);
 };
 
 #endif // HMICLIENT_H

@@ -3,12 +3,13 @@
 SCPAManager::SCPAManager()
 {
     // Instancia los servicios
-    hmiThread = new HMIThread(this);    // Servidor de HMI
+    hmiThread = new HMIThread();    // Servidor de HMI
 }
 
 SCPAManager::~SCPAManager()
 {
-
+    // Se elimina
+    delete hmiThread;
 }
 
 void SCPAManager::start()

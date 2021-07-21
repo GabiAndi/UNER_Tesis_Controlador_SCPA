@@ -11,7 +11,6 @@
 #define HMITHREAD_H
 
 #include <QThread>
-#include <QDebug>
 
 #include "hmimanager.h"
 

@@ -3,7 +3,7 @@
 SCPAProtocol::SCPAProtocol(QObject *parent) : QThread(parent)
 {
     // Se instancia el timer de timeout
-    packageTimeOut = new QTimer(this);
+    packageTimeOut = new QTimer();
 
     connect(packageTimeOut, &QTimer::timeout, this, &SCPAProtocol::packageTimeOutTrigger);
 }
@@ -11,20 +11,22 @@ SCPAProtocol::SCPAProtocol(QObject *parent) : QThread(parent)
 SCPAProtocol::~SCPAProtocol()
 {
     disconnect(packageTimeOut, &QTimer::timeout, this, &SCPAProtocol::packageTimeOutTrigger);
+
+    delete packageTimeOut;
 }
 
 void SCPAProtocol::readProtocol(const QByteArray dataToRead)
 {
     // Si el buffer no esta lleno se añaden los paquetes
-    if ((pendingDataToRead.length()) <= (PACKAGE_MAX_LENGTH * 1024))
+    if ((pendingDataToRead.length() + dataToRead.length()) <= (PACKAGE_MAX_LENGTH * 1024))
     {
         pendingDataToRead.append(dataToRead);
-    }
 
-    // Si el hilo de analisis de los datos pendientes no se esta ejecutando se ejecuta
-    if (!isRunning())
-    {
-        start();
+        // Si el hilo de analisis de los datos pendientes no se esta ejecutando se ejecuta
+        if (!isRunning())
+        {
+            start();
+        }
     }
 }
 
