@@ -1,15 +1,14 @@
 #include "scpamanager.h"
 
-SCPAManager::SCPAManager()
+SCPAManager::SCPAManager(QObject *parent) : QObject(parent)
 {
     // Instancia los servicios
-    hmiThread = new HMIThread();    // Servidor de HMI
+    hmiThread = new HMIThread(this);    // Servidor de HMI
 }
 
 SCPAManager::~SCPAManager()
 {
-    // Se elimina
-    delete hmiThread;
+
 }
 
 void SCPAManager::start()

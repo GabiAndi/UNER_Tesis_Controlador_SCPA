@@ -32,7 +32,7 @@ class SCPAProtocol : public QThread
         static uint8_t checksum(QByteArray *data);
 
         static const uint16_t PACKAGE_MAX_LENGTH = 1;  // Tamaño maximo en kilobytes del buffer de lectura
-        static const uint16_t PACKAGE_MAX_TIMEOUT_MS = 100;    // Tiempo maximo de espera para la recepción completa de un paquete
+        static const uint16_t PACKAGE_MAX_TIMEOUT_MS = 1000;    // Tiempo maximo de espera para la recepción completa de un paquete
 
     protected:
         void run() override;
@@ -45,7 +45,7 @@ class SCPAProtocol : public QThread
         uint8_t packageInfo = 0;
         uint16_t packagePayloadLength = 0;
 
-        QTimer *packageTimeOut = nullptr;
+        //QTimer *packageTimeOut = nullptr;
 
         typedef struct scpaPackage
         {

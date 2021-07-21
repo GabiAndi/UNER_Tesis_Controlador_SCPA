@@ -22,7 +22,7 @@ HMIClient::HMIClient(QObject *parent, QTcpSocket *hmiClient, int id) : QObject(p
         qInfo() << "ID: " << id;
 
         // Protocolo
-        scpaProtocol = new SCPAProtocol();
+        scpaProtocol = new SCPAProtocol(this);
 
         // Hilos
         connect(scpaProtocol, &SCPAProtocol::started, this, &HMIClient::scpaProtocolThreadStart);
@@ -32,17 +32,6 @@ HMIClient::HMIClient(QObject *parent, QTcpSocket *hmiClient, int id) : QObject(p
 
 HMIClient::~HMIClient()
 {
-    // Comunicacion
-    disconnect(this->hmiClient, &QTcpSocket::disconnected, this, &HMIClient::hmiClientDisconnected);
-    disconnect(this->hmiClient, &QTcpSocket::readyRead, this, &HMIClient::hmiClientReadData);
-
-    // Hilos
-    disconnect(scpaProtocol, &SCPAProtocol::started, this, &HMIClient::scpaProtocolThreadStart);
-    disconnect(scpaProtocol, &SCPAProtocol::finished, this, &HMIClient::scpaProtocolThreadStop);
-
-    // Protocolo
-    delete scpaProtocol;
-
     qInfo() << "Cliente eliminado";
 }
 

@@ -3,7 +3,7 @@
 HMIManager::HMIManager(QObject *parent) : QObject(parent)
 {
     // Inicializacion del servidor
-    hmiServer = new QTcpServer();
+    hmiServer = new QTcpServer(this);
 
     connect(hmiServer, &QTcpServer::newConnection, this, &HMIManager::newConnection);
     connect(hmiServer, &QTcpServer::acceptError, this, &HMIManager::newConnectionError);
@@ -24,14 +24,14 @@ HMIManager::HMIManager(QObject *parent) : QObject(parent)
 
 HMIManager::~HMIManager()
 {
-    delete hmiServer;
-
     for (int i = 0; i < hmiClients->length() ; i++)
     {
         hmiClients->at(i)->hmiClientDisconect();
     }
 
     delete hmiClients;
+
+    qInfo() << "Servidor HMI detenido";
 }
 
 void HMIManager::newConnection()

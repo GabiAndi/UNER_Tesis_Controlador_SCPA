@@ -20,7 +20,7 @@ class SCPAManager : public QObject
         Q_OBJECT
 
     public:
-        explicit SCPAManager();
+        explicit SCPAManager(QObject *parent = nullptr);
         ~SCPAManager();
 
         void start();

@@ -2,17 +2,12 @@
 
 SCPAProtocol::SCPAProtocol(QObject *parent) : QThread(parent)
 {
-    // Se instancia el timer de timeout
-    packageTimeOut = new QTimer();
 
-    connect(packageTimeOut, &QTimer::timeout, this, &SCPAProtocol::packageTimeOutTrigger);
 }
 
 SCPAProtocol::~SCPAProtocol()
 {
-    disconnect(packageTimeOut, &QTimer::timeout, this, &SCPAProtocol::packageTimeOutTrigger);
 
-    delete packageTimeOut;
 }
 
 void SCPAProtocol::readProtocol(const QByteArray dataToRead)
@@ -44,6 +39,11 @@ uint8_t SCPAProtocol::checksum(QByteArray *data)
 
 void SCPAProtocol::run()
 {
+    // Se instancia el timer de timeout
+    QTimer *packageTimeOut = new QTimer(this);
+
+    connect(packageTimeOut, &QTimer::timeout, this, &SCPAProtocol::packageTimeOutTrigger);
+
     // Mientras haya datos por leer
     while (!pendingDataToRead.isEmpty())
     {
@@ -242,12 +242,14 @@ void SCPAProtocol::run()
                 break;
         }
     }
+
+    disconnect(packageTimeOut, &QTimer::timeout, this, &SCPAProtocol::packageTimeOutTrigger);
+
+    delete packageTimeOut;
 }
 
 void SCPAProtocol::packageReset()
 {
-    packageTimeOut->stop();
-
     pendingDataToRead.remove(0, packageReadIndex + 1);
 
     pendingPackageToRead.cmd = 0x00;
