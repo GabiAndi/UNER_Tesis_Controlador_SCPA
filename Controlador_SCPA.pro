@@ -17,11 +17,13 @@ SOURCES += \
         hmithread.cpp \
         main.cpp \
         scpamanager.cpp \
-        scpaprotocol.cpp
+        scpaprotocol.cpp \
+        tuithread.cpp
 
 HEADERS += \
         hmiclient.h \
         hmimanager.h \
         hmithread.h \
         scpamanager.h \
-        scpaprotocol.h
+        scpaprotocol.h \
+        tuithread.h

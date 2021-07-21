@@ -13,6 +13,7 @@
 
 #include <QObject>
 
+#include "tuithread.h"
 #include "hmithread.h"
 
 class SCPAManager : public QObject
@@ -26,6 +27,7 @@ class SCPAManager : public QObject
         void start();
 
     private:
+        TUIThread *tuiThread = nullptr;
         HMIThread *hmiThread = nullptr;
 };
 

@@ -13,7 +13,7 @@ HMIThread::~HMIThread()
 void HMIThread::run()
 {
     // Instancia del gestor del HMI
-    hmiManager = new HMIManager();
+    HMIManager *hmiManager = new HMIManager();
 
     // Bucle
     exec();

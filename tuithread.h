@@ -1,29 +1,29 @@
 /*************************************************************/
 /* AUTOR: GabiAndi                                           */
-/* FECHA: 20/07/2021                                         */
+/* FECHA: 21/07/2021                                         */
 /*                                                           */
 /* DESCRIPCION:                                              */
 /* Clase encargada de gestionar el hilo correspondiente al   */
-/* servidor HMI.                                             */
+/* TUI.                                                      */
 /*************************************************************/
 
-#ifndef HMITHREAD_H
-#define HMITHREAD_H
+#ifndef TUITHREAD_H
+#define TUITHREAD_H
 
 #include <QThread>
+#include <QDebug>
+#include <QTextStream>
 
-#include "hmimanager.h"
-
-class HMIThread : public QThread
+class TUIThread : public QThread
 {
         Q_OBJECT
 
     public:
-        explicit HMIThread(QObject *parent = nullptr);
-        ~HMIThread();
+        explicit TUIThread(QObject *parent = nullptr);
+        ~TUIThread();
 
     protected:
         void run() override;
 };
 
-#endif // HMITHREAD_H
+#endif // TUITHREAD_H
