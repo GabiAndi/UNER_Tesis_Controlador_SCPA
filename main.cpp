@@ -20,12 +20,6 @@ int main(int argc, char *argv[])
 
     scpaManager->start();
 
-    // Bucle infinito
-    int exit = a.exec();
-
-    // Operaciones de cierre de la aplicacion
-    delete scpaManager;
-
     // Devuelve la causa del cierre del programa
-    return exit;
+    return a.exec();
 }

@@ -6,7 +6,7 @@ QT += core network
 CONFIG += c++11 console
 CONFIG -= app_bundle
 
-# Configuración del deploy
+# Configuración del deploy para Raspberry
 target.path = /home/pi/$${TARGET}/bin
 INSTALLS += target
 
@@ -18,6 +18,7 @@ SOURCES += \
         main.cpp \
         scpamanager.cpp \
         scpaprotocol.cpp \
+        tuimanager.cpp \
         tuithread.cpp
 
 HEADERS += \
@@ -26,4 +27,5 @@ HEADERS += \
         hmithread.h \
         scpamanager.h \
         scpaprotocol.h \
+        tuimanager.h \
         tuithread.h

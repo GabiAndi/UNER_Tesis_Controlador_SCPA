@@ -12,29 +12,18 @@ TUIThread::~TUIThread()
 
 void TUIThread::run()
 {
-    // Entrada y salida de consola
-    QTextStream inputStream(stdin, QIODevice::OpenModeFlag::ReadOnly);
-    QTextStream outputStream(stdout, QIODevice::OpenModeFlag::WriteOnly);
+    // Se inicia el TUI
+    TUIManager *tuiManager = new TUIManager();
 
-    // Comando
-    QString cmd;
+    // Captura de texto
+    tuiManager->loop();
 
-    // Bucle de captura
-    bool exitFlag = false;
+    // Se envia la señal de que se cerrara la aplicacion
+    emit closing();
 
-    // Bucle de TUI
-    while (!exitFlag)
-    {
-        outputStream << "SCPA: ";
-        outputStream.flush();
+    // Bucle para las llamadas
+    exec();
 
-        cmd = inputStream.readLine();
-
-        outputStream << Qt::endl;
-
-        if (cmd == "exit")
-        {
-            exitFlag = true;
-        }
-    }
+    // Se elimina
+    delete tuiManager;
 }

@@ -26,9 +26,22 @@ class SCPAManager : public QObject
 
         void start();
 
+    public slots:
+        void closing();
+
     private:
+        // TUI
         TUIThread *tuiThread = nullptr;
+
+        // HMI
         HMIThread *hmiThread = nullptr;
+
+        // Comprobación de los hilos
+        void closingProgress();
+
+    private slots:
+        void tuiThreadFinished();
+        void hmiThreadFinished();
 };
 
 #endif // SCPAMANAGER_H

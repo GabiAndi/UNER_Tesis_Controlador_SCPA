@@ -11,8 +11,8 @@
 #define TUITHREAD_H
 
 #include <QThread>
-#include <QDebug>
-#include <QTextStream>
+
+#include "tuimanager.h"
 
 class TUIThread : public QThread
 {
@@ -21,6 +21,9 @@ class TUIThread : public QThread
     public:
         explicit TUIThread(QObject *parent = nullptr);
         ~TUIThread();
+
+    signals:
+        void closing();
 
     protected:
         void run() override;

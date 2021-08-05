@@ -40,7 +40,6 @@ class HMIManager : public QObject
         // Conexiones
         void newConnection();
         void newConnectionError(const QAbstractSocket::SocketError socketError);
-
         void hmiClientDisconnected(HMIClient *hmiClient);
 };
 
