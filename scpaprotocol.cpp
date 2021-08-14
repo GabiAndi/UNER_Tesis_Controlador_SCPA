@@ -10,6 +10,16 @@ SCPAProtocol::~SCPAProtocol()
 
 }
 
+void SCPAProtocol::setExitPending()
+{
+    exitPending = true;
+}
+
+bool SCPAProtocol::getExitPending()
+{
+    return exitPending;
+}
+
 void SCPAProtocol::readProtocol(const QByteArray dataToRead)
 {
     // Si el buffer no esta lleno se añaden los paquetes
@@ -45,7 +55,7 @@ void SCPAProtocol::run()
     connect(packageTimeOut, &QTimer::timeout, this, &SCPAProtocol::packageTimeOutTrigger);
 
     // Mientras haya datos por leer
-    while (!pendingDataToRead.isEmpty())
+    while ((!pendingDataToRead.isEmpty()) && (!exitPending))
     {
         switch (packageState)
         {
@@ -224,8 +234,6 @@ void SCPAProtocol::run()
                 else
                 {
                     packageReset();
-
-                    qInfo() << "El checksum del paquete no coincide";
                 }
 
                 break;
@@ -237,7 +245,6 @@ void SCPAProtocol::run()
                 break;
 
             default:
-                qCritical() << "Esto no debería estar ocurriendo";
 
                 break;
         }
@@ -269,6 +276,4 @@ void SCPAProtocol::packageRead(const scpaPackage_t paquete)
 void SCPAProtocol::packageTimeOutTrigger()
 {
     packageReset();
-
-    qWarning() << "TimeOut paquete";
 }

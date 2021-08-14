@@ -15,6 +15,9 @@ void HMIThread::run()
     // Instancia del gestor del HMI
     HMIManager *hmiManager = new HMIManager();
 
+    // Se inicia el gestor
+    hmiManager->start();
+
     // Bucle
     exec();
 

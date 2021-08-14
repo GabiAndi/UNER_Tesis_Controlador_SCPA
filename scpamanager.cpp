@@ -2,35 +2,47 @@
 
 SCPAManager::SCPAManager(QObject *parent) : QObject(parent)
 {
+    // Log
+    logFile = new LogFile(this, "SCPAManager.txt");
 
+    logFile->println("Iniciando");
+
+    // TUI
+    tuiThread = new TUIThread(this);
+
+    connect(tuiThread, &TUIThread::finished, this, &SCPAManager::tuiThreadFinished);
+    connect(tuiThread, &TUIThread::started, this, &SCPAManager::tuiThreadStarted);
+
+    connect(tuiThread, &TUIThread::closing, this, &SCPAManager::closing);
+
+    // HMI
+    hmiThread = new HMIThread(this);
+
+    connect(hmiThread, &HMIThread::finished, this, &SCPAManager::hmiThreadFinished);
+    connect(hmiThread, &HMIThread::started, this, &SCPAManager::hmiThreadStarted);
 }
 
 SCPAManager::~SCPAManager()
 {
+    logFile->println("Saliendo");
+
     // Se cierra la aplicacion
     exit(0);
 }
 
 void SCPAManager::start()
 {
-    // TUI
-    tuiThread = new TUIThread(this);
+    logFile->println("Iniciando procesos");
 
-    connect(tuiThread, &TUIThread::closing, this, &SCPAManager::closing);
-    connect(tuiThread, &TUIThread::finished, this, &SCPAManager::tuiThreadFinished);
-
+    // Threads
     tuiThread->start();
-
-    // HMI
-    hmiThread = new HMIThread(this);
-
-    connect(hmiThread, &HMIThread::finished, this, &SCPAManager::hmiThreadFinished);
-
     hmiThread->start();
 }
 
 void SCPAManager::closing()
 {
+    logFile->println("Finalizando procesos");
+
     // Se cierran los procesos
     tuiThread->exit(0);
     hmiThread->exit(0);
@@ -38,25 +50,59 @@ void SCPAManager::closing()
 
 void SCPAManager::tuiThreadFinished()
 {
+    logFile->println("TUIThread finalizado");
+
     // Se verifica si se finalizo todo
-    closingProgress();
+    finishProgress();
+}
+
+void SCPAManager::tuiThreadStarted()
+{
+    logFile->println("TUIThread iniciado");
+
+    // Se verifica si se inicio todo
+    initProgress();
 }
 
 void SCPAManager::hmiThreadFinished()
 {
+    logFile->println("HMIThread finalizado");
+
     // Se verifica si se finalizo todo
-    closingProgress();
+    finishProgress();
 }
 
-void SCPAManager::closingProgress()
+void SCPAManager::hmiThreadStarted()
+{
+    logFile->println("HMIThread iniciado");
+
+    // Se verifica si se inicio todo
+    initProgress();
+}
+
+void SCPAManager::finishProgress()
 {
     /*
      * Si todos los hilos del programa se cerraron,
-     * se manda a cerrar el tui para finalizar el programa
+     * se manda a destruir el controlador de aplicación
+     * que terminará por finalizar la ejecución del programa
+     * principal.
      */
     if (tuiThread->isFinished() && hmiThread->isFinished())
     {
-        // Cuando todos los hilos se cierren se borra el objeto
+        logFile->println("Todos los procesos se finalizaron");
+
         deleteLater();
+    }
+}
+
+void SCPAManager::initProgress()
+{
+    /*
+     * Si todos los hilos del programa se iniciaron.
+     */
+    if (tuiThread->isRunning() && hmiThread->isRunning())
+    {
+        logFile->println("Todos los procesos se iniciaron");
     }
 }

@@ -12,7 +12,6 @@
 #include <QThread>
 #include <QByteArray>
 #include <QTimer>
-#include <QDebug>
 
 class SCPAProtocol : public QThread
 {
@@ -21,6 +20,9 @@ class SCPAProtocol : public QThread
     public:
         explicit SCPAProtocol(QObject *parent = nullptr);
         ~SCPAProtocol();
+
+        void setExitPending();
+        bool getExitPending();
 
         enum INFO
         {
@@ -44,6 +46,8 @@ class SCPAProtocol : public QThread
         uint16_t packageReadIndex = 0;
         uint8_t packageInfo = 0;
         uint16_t packagePayloadLength = 0;
+
+        bool exitPending = false;
 
         //QTimer *packageTimeOut = nullptr;
 

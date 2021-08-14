@@ -15,6 +15,7 @@ SOURCES += \
         hmiclient.cpp \
         hmimanager.cpp \
         hmithread.cpp \
+        logfile.cpp \
         main.cpp \
         scpamanager.cpp \
         scpaprotocol.cpp \
@@ -25,6 +26,7 @@ HEADERS += \
         hmiclient.h \
         hmimanager.h \
         hmithread.h \
+        logfile.h \
         scpamanager.h \
         scpaprotocol.h \
         tuimanager.h \

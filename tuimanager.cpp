@@ -2,12 +2,15 @@
 
 TUIManager::TUIManager(QObject *parent) : QObject(parent)
 {
+    // Log
+    logFile = new LogFile(this, "TUIManager.txt");
 
+    logFile->println("Iniciando");
 }
 
 TUIManager::~TUIManager()
 {
-
+    logFile->println("Saliendo");
 }
 
 void TUIManager::loop()
@@ -23,7 +26,7 @@ void TUIManager::loop()
     while (!exitFlag)
     {
         // Cabecera
-        outputStream << "SCPA: ";
+        outputStream << "Ingrese comando del SCPA: ";
         outputStream.flush();
 
         // Lectura de datos
@@ -31,15 +34,36 @@ void TUIManager::loop()
 
         outputStream << Qt::endl;
 
-        // Comando de cierre de programa
-        if (cmd == "exit")
+        // Se analiza el comando escrito
+        switch (getCommand(cmd))
         {
-            commandClose();
+            case exit:
+                logFile->println("Se recibio comando de cierre");
+
+                commandClose();
+
+                break;
+
+            case unknown:
+                outputStream << "Comando inválido: " << cmd << Qt::endl;
+
+                break;
         }
     }
 
     // Eventos pre cierre
     outputStream << "Cerrando SCPA" << Qt::endl;
+}
+
+int TUIManager::getCommand(const QString &cmd)
+{
+    // Comando de cierre de programa
+    if (cmd == "exit")
+    {
+        return exit;
+    }
+
+    return unknown;
 }
 
 void TUIManager::commandClose()

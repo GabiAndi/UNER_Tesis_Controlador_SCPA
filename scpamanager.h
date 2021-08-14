@@ -12,7 +12,9 @@
 #define SCPAMANAGER_H
 
 #include <QObject>
+#include <QFile>
 
+#include "logfile.h"
 #include "tuithread.h"
 #include "hmithread.h"
 
@@ -30,18 +32,27 @@ class SCPAManager : public QObject
         void closing();
 
     private:
+        // Log
+        LogFile *logFile = nullptr;
+
         // TUI
         TUIThread *tuiThread = nullptr;
 
         // HMI
         HMIThread *hmiThread = nullptr;
 
-        // Comprobación de los hilos
-        void closingProgress();
+        // Comprobación de los hilos para el cierre
+        void finishProgress();
+
+        // Comprobación de los hilos para el inicio
+        void initProgress();
 
     private slots:
         void tuiThreadFinished();
+        void tuiThreadStarted();
+
         void hmiThreadFinished();
+        void hmiThreadStarted();
 };
 
 #endif // SCPAMANAGER_H

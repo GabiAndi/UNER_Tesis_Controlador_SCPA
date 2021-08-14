@@ -13,6 +13,8 @@
 #include <QObject>
 #include <QTextStream>
 
+#include "logfile.h"
+
 class TUIManager : public QObject
 {
         Q_OBJECT
@@ -24,9 +26,21 @@ class TUIManager : public QObject
         void loop();
 
     private:
+        // Log
+        LogFile *logFile = nullptr;
+
         bool exitFlag = false;
 
+        int getCommand(const QString &cmd);
+
         void commandClose();
+
+        typedef enum
+        {
+            unknown = -1,
+            exit = 0,
+            help = 1,
+        }commands_e;
 };
 
 #endif // TUIMANAGER_H
