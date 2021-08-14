@@ -45,7 +45,7 @@ void TUIManager::loop()
                 break;
 
             case unknown:
-                outputStream << "Comando inválido: " << cmd << Qt::endl;
+                outputStream << "Comando invalido: " << cmd << Qt::endl;
 
                 break;
         }

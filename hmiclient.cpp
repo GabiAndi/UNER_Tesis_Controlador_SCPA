@@ -21,9 +21,10 @@ HMIClient::HMIClient(QObject *parent, QTcpSocket *hmiClient, int id) : QObject(p
         connect(scpaProtocol, &SCPAProtocol::finished, this, &HMIClient::scpaProtocolThreadStop);
     }
 
+    // Si un id invalido es asignado el cliente se borra automaticamente
     else
     {
-
+        deleteLater();
     }
 }
 
@@ -51,6 +52,7 @@ void HMIClient::closeThisClient()
 
 void HMIClient::hmiClientDisconnected()
 {
+    // Si se esta analizando datos, se manda a deterner
     if (scpaProtocol->isRunning())
     {
         scpaProtocol->setExitPending();

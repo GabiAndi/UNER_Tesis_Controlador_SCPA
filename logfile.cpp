@@ -10,11 +10,14 @@ LogFile::LogFile(QObject *parent, const QString &fileName) : QObject(parent)
 
     logFile = new QFile(logSubdir + "/" + fileName, this);
 
-    // Solo añade al final del archivo
-    //logFile->open(QIODevice::OpenModeFlag::ReadWrite | QIODevice::OpenModeFlag::Append);
+    // Si el archivo existe se elimina
+    if (logFile->exists())
+    {
+        logFile->remove();
+    }
 
-    // Borra el contenido anterior
-    logFile->open(QIODevice::OpenModeFlag::ReadWrite);
+    // Se abre el archivo para añadir contenido al final
+    logFile->open(QIODevice::OpenModeFlag::ReadWrite | QIODevice::OpenModeFlag::Append);
 }
 
 LogFile::~LogFile()

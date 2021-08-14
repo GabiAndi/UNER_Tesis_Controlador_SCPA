@@ -67,13 +67,13 @@ int HMIManager::getID()
 
 void HMIManager::newConnection()
 {
-    logFile->println("Nueva conexión entrante");
+    logFile->println("Nueva conexion entrante");
 
     int newId = getID();
 
     if (newId != -1)
     {
-        logFile->println("Conexión aceptada");
+        logFile->println(QString::asprintf("Conexion aceptada con id: %d", newId));
 
         HMIClient *newClient = new HMIClient(this, hmiServer->nextPendingConnection(), newId);
 
@@ -84,17 +84,19 @@ void HMIManager::newConnection()
 
     else
     {
-        logFile->println("Conexión rechasada");
+        logFile->println("Conexion rechasada");
     }
 }
 
 void HMIManager::newConnectionError(const QAbstractSocket::SocketError socketError)
 {
-    logFile->println("Error en la conexión entrante: " + QString(socketError));
+    logFile->println(QString::asprintf("Error en la conexion entrante: %d", socketError));
 }
 
 void HMIManager::hmiClientDisconnected(HMIClient *hmiClient)
 {
+    logFile->println(QString::asprintf("Conexion cerrada del cliente id: %d", hmiClient->getId()));
+
     hmiClients->removeOne(hmiClient);
 
     disconnect(hmiClient, &HMIClient::hmiClientClosed, this, &HMIManager::hmiClientDisconnected);
