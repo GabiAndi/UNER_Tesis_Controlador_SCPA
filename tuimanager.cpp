@@ -22,6 +22,8 @@ void TUIManager::loop()
     // Comando
     QString cmd;
 
+    logFile->println("Capturando consola");
+
     // Bucle de TUI
     while (!exitFlag)
     {
@@ -38,8 +40,6 @@ void TUIManager::loop()
         switch (getCommand(cmd))
         {
             case exit:
-                logFile->println("Se recibio comando de cierre");
-
                 commandClose();
 
                 break;
@@ -52,6 +52,8 @@ void TUIManager::loop()
     }
 
     // Eventos pre cierre
+    logFile->println("Cerrando consola");
+
     outputStream << "Cerrando SCPA" << Qt::endl;
 }
 

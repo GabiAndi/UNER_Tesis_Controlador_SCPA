@@ -5,7 +5,7 @@ SCPAManager::SCPAManager(QObject *parent) : QObject(parent)
     // Log
     logFile = new LogFile(this, "SCPAManager.txt");
 
-    logFile->println("Iniciando");
+    logFile->println("Iniciando aplicacion");
 
     // TUI
     tuiThread = new TUIThread(this);
@@ -24,7 +24,7 @@ SCPAManager::SCPAManager(QObject *parent) : QObject(parent)
 
 SCPAManager::~SCPAManager()
 {
-    logFile->println("Saliendo");
+    logFile->println("Finalizando aplicacion");
 
     // Se cierra la aplicacion
     exit(0);

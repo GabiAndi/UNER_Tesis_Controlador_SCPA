@@ -10,6 +10,9 @@ CONFIG -= app_bundle
 target.path = /home/pi/$${TARGET}/bin
 INSTALLS += target
 
+# Librerias
+LIBS +=
+
 # Archivos de recursos
 SOURCES += \
         hmiclient.cpp \

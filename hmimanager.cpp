@@ -5,7 +5,7 @@ HMIManager::HMIManager(QObject *parent) : QObject(parent)
     // Log
     logFile = new LogFile(this, "HMIManager.txt");
 
-    logFile->println("Iniciando");
+    logFile->println("Iniciando servidor HMI");
 
     // Inicializacion del servidor
     hmiServer = new QTcpServer(this);
@@ -16,7 +16,7 @@ HMIManager::HMIManager(QObject *parent) : QObject(parent)
 
 HMIManager::~HMIManager()
 {
-    logFile->println("Saliendo");
+    logFile->println("Servidor HMI cerrado");
 
     delete hmiClients;
 }
