@@ -10,14 +10,9 @@ SCPAProtocol::~SCPAProtocol()
 
 }
 
-void SCPAProtocol::setExitPending()
+void SCPAProtocol::abortReadProtocol()
 {
-    exitPending = true;
-}
-
-bool SCPAProtocol::getExitPending()
-{
-    return exitPending;
+    abort = true;
 }
 
 void SCPAProtocol::readProtocol(const QByteArray dataToRead)
@@ -50,9 +45,10 @@ uint8_t SCPAProtocol::checksum(QByteArray &data)
 void SCPAProtocol::run()
 {
     // Mientras haya datos por leer
-    while ((!pendingDataToRead.isEmpty()) && (!exitPending))
+    while ((!pendingDataToRead.isEmpty()) && (!abort))
     {
-        pendingDataToRead.at(0);
+        qDebug() << pendingDataToRead.at(0);
         pendingDataToRead.remove(0, 1);
+        msleep(1000);
     }
 }

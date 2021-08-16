@@ -31,6 +31,8 @@ class HMIManager : public QObject
 
         void start();
 
+        void closeAllClients();
+
     private:
         // Log
         LogFile *logFile = nullptr;
@@ -44,11 +46,15 @@ class HMIManager : public QObject
 
         int getID();    // Devuelve un id para el nuevo cliente si hay lugar
 
+        bool closingAplication = false;
+
     public slots:
         // Conexiones
         void newConnection();
         void newConnectionError(const QAbstractSocket::SocketError socketError);
         void hmiClientDisconnected(HMIClient *hmiClient);
+
+        void closeAplication();
 };
 
 #endif // HMIMANAGER_H

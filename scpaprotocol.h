@@ -12,6 +12,7 @@
 #include <QThread>
 #include <QByteArray>
 #include <QTimer>
+#include <QDebug>
 
 class SCPAProtocol : public QThread
 {
@@ -21,8 +22,7 @@ class SCPAProtocol : public QThread
         explicit SCPAProtocol(QObject *parent = nullptr);
         ~SCPAProtocol();
 
-        void setExitPending();
-        bool getExitPending();
+        void abortReadProtocol();
 
         void readProtocol(const QByteArray dataToRead);
         static uint8_t checksum(QByteArray &data);
@@ -35,7 +35,7 @@ class SCPAProtocol : public QThread
     private:
         QByteArray pendingDataToRead;
 
-        bool exitPending = false;
+        bool abort = false;
 };
 
 #endif // SCPAPROTOCOL_H

@@ -10,12 +10,8 @@ HMIClient::HMIClient(QObject *parent, QTcpSocket *hmiClient, int id) : QObject(p
     connect(this->hmiClient, &QTcpSocket::disconnected, this, &HMIClient::hmiClientDisconnected);
     connect(this->hmiClient, &QTcpSocket::readyRead, this, &HMIClient::hmiClientReadData);
 
-    // Protocolo
+    // Protocolo de comunicion
     scpaProtocol = new SCPAProtocol(this);
-
-    // Hilos
-    connect(scpaProtocol, &SCPAProtocol::started, this, &HMIClient::scpaProtocolThreadStart);
-    connect(scpaProtocol, &SCPAProtocol::finished, this, &HMIClient::scpaProtocolThreadStop);
 }
 
 HMIClient::~HMIClient()
@@ -23,7 +19,7 @@ HMIClient::~HMIClient()
 
 }
 
-void HMIClient::disconect()
+void HMIClient::disconnectClient()
 {
     hmiClient->disconnectFromHost();
 }
@@ -42,10 +38,11 @@ void HMIClient::closeThisClient()
 
 void HMIClient::hmiClientDisconnected()
 {
-    // Si se esta analizando datos, se manda a deterner
     if (scpaProtocol->isRunning())
     {
-        scpaProtocol->setExitPending();
+        connect(scpaProtocol, &SCPAProtocol::finished, this, &HMIClient::scpaProtocolFinished);
+
+        scpaProtocol->abortReadProtocol();
     }
 
     else
@@ -56,19 +53,12 @@ void HMIClient::hmiClientDisconnected()
 
 void HMIClient::hmiClientReadData()
 {
-    // Lectura de los datos pendientes
     scpaProtocol->readProtocol(hmiClient->readAll());
 }
 
-void HMIClient::scpaProtocolThreadStart()
+void HMIClient::scpaProtocolFinished()
 {
+    disconnect(scpaProtocol, &SCPAProtocol::finished, this, &HMIClient::scpaProtocolFinished);
 
-}
-
-void HMIClient::scpaProtocolThreadStop()
-{
-    if (scpaProtocol->getExitPending())
-    {
-        closeThisClient();
-    }
+    closeThisClient();
 }

@@ -22,8 +22,17 @@ class HMIThread : public QThread
         explicit HMIThread(QObject *parent = nullptr);
         ~HMIThread();
 
+    public slots:
+        void finishProcess();
+
     protected:
         void run() override;
+
+    private:
+        HMIManager *hmiManager = nullptr;
+
+    signals:
+        void closeAplication();
 };
 
 #endif // HMITHREAD_H

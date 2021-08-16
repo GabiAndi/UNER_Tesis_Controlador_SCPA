@@ -29,7 +29,7 @@ class TUIManager : public QObject
         // Log
         LogFile *logFile = nullptr;
 
-        bool exitFlag = false;
+        bool closeAplicationFlag = false;
 
         int getCommand(const QString &cmd);
 

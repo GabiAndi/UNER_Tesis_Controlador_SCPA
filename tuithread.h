@@ -22,11 +22,16 @@ class TUIThread : public QThread
         explicit TUIThread(QObject *parent = nullptr);
         ~TUIThread();
 
+        void finishProcess();
+
     signals:
-        void closing();
+        void closeAplication();
 
     protected:
         void run() override;
+
+    private:
+        TUIManager *tuiManager = nullptr;
 };
 
 #endif // TUITHREAD_H

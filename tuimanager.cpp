@@ -5,12 +5,12 @@ TUIManager::TUIManager(QObject *parent) : QObject(parent)
     // Log
     logFile = new LogFile(this, "TUIManager.txt");
 
-    logFile->println("Iniciando");
+    logFile->println("Iniciando consola");
 }
 
 TUIManager::~TUIManager()
 {
-    logFile->println("Saliendo");
+    logFile->println("Consola cerrada");
 }
 
 void TUIManager::loop()
@@ -25,7 +25,7 @@ void TUIManager::loop()
     logFile->println("Capturando consola");
 
     // Bucle de TUI
-    while (!exitFlag)
+    while (!closeAplicationFlag)
     {
         // Cabecera
         outputStream << "Ingrese comando del SCPA: ";
@@ -71,5 +71,5 @@ int TUIManager::getCommand(const QString &cmd)
 void TUIManager::commandClose()
 {
     // Se marca la aplicacion para el cierre
-    exitFlag = true;
+    closeAplicationFlag = true;
 }

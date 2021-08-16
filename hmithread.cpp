@@ -10,10 +10,17 @@ HMIThread::~HMIThread()
 
 }
 
+void HMIThread::finishProcess()
+{
+    emit closeAplication();
+}
+
 void HMIThread::run()
 {
     // Instancia del gestor del HMI
-    HMIManager *hmiManager = new HMIManager();
+    hmiManager = new HMIManager();
+
+    connect(this, &HMIThread::closeAplication, hmiManager, &HMIManager::closeAplication);
 
     // Se inicia el gestor
     hmiManager->start();
@@ -22,5 +29,9 @@ void HMIThread::run()
     exec();
 
     // Se borra la instancia
+    disconnect(this, &HMIThread::closeAplication, hmiManager, &HMIManager::closeAplication);
+
     delete hmiManager;
+
+    hmiManager = nullptr;
 }

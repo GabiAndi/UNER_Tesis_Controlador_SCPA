@@ -10,20 +10,27 @@ TUIThread::~TUIThread()
 
 }
 
+void TUIThread::finishProcess()
+{
+    exit(0);
+}
+
 void TUIThread::run()
 {
     // Se inicia el TUI
-    TUIManager *tuiManager = new TUIManager();
+    tuiManager = new TUIManager();
 
     // Captura de texto
     tuiManager->loop();
 
     // Se envia la señal de que se cerrara la aplicacion
-    emit closing();
+    emit closeAplication();
 
     // Bucle para las llamadas
     exec();
 
     // Se elimina
     delete tuiManager;
+
+    tuiManager = nullptr;
 }

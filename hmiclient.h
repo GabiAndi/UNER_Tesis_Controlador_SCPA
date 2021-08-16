@@ -23,7 +23,7 @@ class HMIClient : public QObject
         explicit HMIClient(QObject *parent = nullptr, QTcpSocket *hmiClient = nullptr, int id = -1);
         ~HMIClient();
 
-        void disconect();
+        void disconnectClient();
 
         int getId();
 
@@ -32,17 +32,15 @@ class HMIClient : public QObject
 
         int id = -1;    // ID asignado al cliente
 
-        SCPAProtocol *scpaProtocol = nullptr;
-
-        bool closing = false;
         void closeThisClient();
+
+        SCPAProtocol *scpaProtocol = nullptr;
 
     private slots:
         void hmiClientDisconnected();
         void hmiClientReadData();
 
-        void scpaProtocolThreadStart();
-        void scpaProtocolThreadStop();
+        void scpaProtocolFinished();
 
     signals:
         void hmiClientClosed(HMIClient *thisClient);

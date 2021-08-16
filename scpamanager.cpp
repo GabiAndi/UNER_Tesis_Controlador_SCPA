@@ -13,7 +13,7 @@ SCPAManager::SCPAManager(QObject *parent) : QObject(parent)
     connect(tuiThread, &TUIThread::finished, this, &SCPAManager::tuiThreadFinished);
     connect(tuiThread, &TUIThread::started, this, &SCPAManager::tuiThreadStarted);
 
-    connect(tuiThread, &TUIThread::closing, this, &SCPAManager::closing);
+    connect(tuiThread, &TUIThread::closeAplication, this, &SCPAManager::closeAplication);
 
     // HMI
     hmiThread = new HMIThread(this);
@@ -39,13 +39,13 @@ void SCPAManager::start()
     hmiThread->start();
 }
 
-void SCPAManager::closing()
+void SCPAManager::closeAplication()
 {
     logFile->println("Finalizando procesos");
 
     // Se cierran los procesos
-    tuiThread->exit(0);
-    hmiThread->exit(0);
+    tuiThread->finishProcess();
+    hmiThread->finishProcess();
 }
 
 void SCPAManager::tuiThreadFinished()

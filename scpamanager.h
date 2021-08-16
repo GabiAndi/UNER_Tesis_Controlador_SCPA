@@ -29,16 +29,14 @@ class SCPAManager : public QObject
         void start();
 
     public slots:
-        void closing();
+        void closeAplication();
 
     private:
         // Log
         LogFile *logFile = nullptr;
 
-        // TUI
+        // Procesos
         TUIThread *tuiThread = nullptr;
-
-        // HMI
         HMIThread *hmiThread = nullptr;
 
         // Comprobación de los hilos para el cierre
