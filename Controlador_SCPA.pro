@@ -15,22 +15,4 @@ LIBS +=
 
 # Archivos de recursos
 SOURCES += \
-        hmiclient.cpp \
-        hmimanager.cpp \
-        hmithread.cpp \
-        logfile.cpp \
-        main.cpp \
-        scpamanager.cpp \
-        scpaprotocol.cpp \
-        tuimanager.cpp \
-        tuithread.cpp
-
-HEADERS += \
-        hmiclient.h \
-        hmimanager.h \
-        hmithread.h \
-        logfile.h \
-        scpamanager.h \
-        scpaprotocol.h \
-        tuimanager.h \
-        tuithread.h
+        main.cpp
