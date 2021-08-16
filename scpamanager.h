@@ -37,7 +37,10 @@ class SCPAManager : public QObject
 
         // Procesos
         TUIThread *tuiThread = nullptr;
+        bool tuiThreadRunning = false;
+
         HMIThread *hmiThread = nullptr;
+        bool hmiThreadRunning = false;
 
         // Comprobación de los hilos para el cierre
         void finishProgress();

@@ -40,6 +40,8 @@ void HMIManager::start()
 
 void HMIManager::closeAplication()
 {
+    logFile->println("Finalizando servidor HMI");
+
     // Marcamos la bandera de cierre
     closingAplication = true;
 

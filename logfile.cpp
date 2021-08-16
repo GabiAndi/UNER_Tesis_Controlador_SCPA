@@ -22,8 +22,10 @@ LogFile::LogFile(QObject *parent, const QString &fileName) : QObject(parent)
 
 LogFile::~LogFile()
 {
+    // Si el archivo quedo abierto, antes de eliminarse se cierra
     if (logFile->isOpen())
     {
+        logFile->flush();
         logFile->close();
     }
 }

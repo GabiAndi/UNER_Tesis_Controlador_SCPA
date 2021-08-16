@@ -10,7 +10,7 @@ TUIManager::TUIManager(QObject *parent) : QObject(parent)
 
 TUIManager::~TUIManager()
 {
-    logFile->println("Consola cerrada");
+    logFile->println("Consola finalizada");
 }
 
 void TUIManager::loop()

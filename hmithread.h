@@ -30,9 +30,6 @@ class HMIThread : public QThread
 
     private:
         HMIManager *hmiManager = nullptr;
-
-    signals:
-        void closeAplication();
 };
 
 #endif // HMITHREAD_H

@@ -52,6 +52,8 @@ void SCPAManager::tuiThreadFinished()
 {
     logFile->println("TUIThread finalizado");
 
+    tuiThreadRunning = false;
+
     // Se verifica si se finalizo todo
     finishProgress();
 }
@@ -59,6 +61,8 @@ void SCPAManager::tuiThreadFinished()
 void SCPAManager::tuiThreadStarted()
 {
     logFile->println("TUIThread iniciado");
+
+    tuiThreadRunning = true;
 
     // Se verifica si se inicio todo
     initProgress();
@@ -68,6 +72,8 @@ void SCPAManager::hmiThreadFinished()
 {
     logFile->println("HMIThread finalizado");
 
+    hmiThreadRunning = false;
+
     // Se verifica si se finalizo todo
     finishProgress();
 }
@@ -75,6 +81,8 @@ void SCPAManager::hmiThreadFinished()
 void SCPAManager::hmiThreadStarted()
 {
     logFile->println("HMIThread iniciado");
+
+    hmiThreadRunning = true;
 
     // Se verifica si se inicio todo
     initProgress();
@@ -88,7 +96,7 @@ void SCPAManager::finishProgress()
      * que terminará por finalizar la ejecución del programa
      * principal.
      */
-    if (tuiThread->isFinished() && hmiThread->isFinished())
+    if (!tuiThreadRunning && !hmiThreadRunning)
     {
         logFile->println("Todos los procesos se finalizaron");
 
@@ -101,7 +109,7 @@ void SCPAManager::initProgress()
     /*
      * Si todos los hilos del programa se iniciaron.
      */
-    if (tuiThread->isRunning() && hmiThread->isRunning())
+    if (tuiThreadRunning && hmiThreadRunning)
     {
         logFile->println("Todos los procesos se iniciaron");
     }
