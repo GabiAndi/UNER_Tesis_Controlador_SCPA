@@ -15,4 +15,14 @@ LIBS +=
 
 # Archivos de recursos
 SOURCES += \
-        main.cpp
+        consolelistener.cpp \
+        logfile.cpp \
+        main.cpp \
+        scpamanager.cpp \
+        tuimanager.cpp
+
+HEADERS += \
+        consolelistener.h \
+        logfile.h \
+        scpamanager.h \
+        tuimanager.h
