@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(scpaManager, &SCPAManager::destroyed, &a, &QCoreApplication::quit);
 
-    scpaManager->start();
+    scpaManager->init();
 
     // Bucle de eventos
     return a.exec();

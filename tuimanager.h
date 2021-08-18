@@ -10,6 +10,8 @@
 #define TUIMANAGER_H
 
 #include <QObject>
+#include <QTextStream>
+#include <QProcess>
 
 #include "logfile.h"
 #include "consolelistener.h"
@@ -29,11 +31,21 @@ class TUIManager : public QObject
         // Evento de consola
         ConsoleListener *consoleListener = nullptr;
 
-    private slots:
-        void consoleReadyLine(const QString &line);
+        // Salida de consola
+        QTextStream *consoleOutput = nullptr;
 
     signals:
         void closeApplication();
+
+    public slots:
+        void init();
+
+        void consoleWelcome();
+        void consoleClear();
+        void consoleWait();
+
+    private slots:
+        void consoleReadyLine(const QString &line);
 };
 
 #endif // TUIMANAGER_H

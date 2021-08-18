@@ -7,7 +7,11 @@ LogFile::LogFile(QObject *parent) : QObject(parent)
 
 LogFile::~LogFile()
 {
-    close();
+    if (file.isOpen())
+    {
+        file.flush();
+        file.close();
+    }
 }
 
 bool LogFile::create(const QString &fileName)
@@ -28,15 +32,6 @@ bool LogFile::create(const QString &fileName)
 
     // Se abre el archivo para añadir contenido al final
     return file.open(QIODevice::OpenModeFlag::ReadWrite | QIODevice::OpenModeFlag::Append);
-}
-
-void LogFile::close()
-{
-    if (file.isOpen())
-    {
-        file.flush();
-        file.close();
-    }
 }
 
 QString LogFile::getTimeLog()

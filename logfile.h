@@ -27,7 +27,6 @@ class LogFile : public QObject
         ~LogFile();
 
         bool create(const QString &fileName);
-        void close();
 
         QString getTimeLog();
 

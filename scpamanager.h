@@ -14,6 +14,7 @@
 
 #include "logfile.h"
 #include "tuimanager.h"
+#include "hmiservermanager.h"
 
 class SCPAManager : public QObject
 {
@@ -23,7 +24,7 @@ class SCPAManager : public QObject
         explicit SCPAManager(QObject *parent = nullptr);
         ~SCPAManager();
 
-        void start();
+        void init();
 
     private:
         // Archivo de logs
@@ -37,8 +38,12 @@ class SCPAManager : public QObject
         const int threadExitTimeOut = 2000;
 
         // TUI
-        TUIManager *tuiManager = nullptr;
         QThread *tuiThread = nullptr;
+        TUIManager *tuiManager = nullptr;
+
+        // HMI Server
+        QThread *hmiServerThread = nullptr;
+        HMIServerManager *hmiServerManager = nullptr;
 };
 
 #endif // SCPAMANAGER_H
