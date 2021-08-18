@@ -12,7 +12,13 @@ HMIServerManager::HMIServerManager(QObject *parent) : QObject(parent)
 
 HMIServerManager::~HMIServerManager()
 {
-    delete[] hmiClients;
+    // Se eliminan los clientes que estan conectados
+    for (int i = 0 ; i < hmiClients->length() ; i++)
+    {
+        delete hmiClients->at(i);
+    }
+
+    delete hmiClients;
 
     // Cierre del archivo de log
     logFile->println("Controlador de servidor finalizado");
@@ -45,8 +51,6 @@ void HMIServerManager::init()
 
 void HMIServerManager::newConnection()
 {
-    logFile->println("Nueva conexion");
-
     HMIClient *newClient = new HMIClient(hmiServer->nextPendingConnection(), this);
 
     hmiClients->append(newClient);
@@ -62,8 +66,6 @@ void HMIServerManager::newConnectionError(const QAbstractSocket::SocketError soc
 void HMIServerManager::hmiClientDisconnected(HMIClient *hmiClient)
 {
     // Se cierra la conexión del cliente eliminandolo de la lista de clientes activos
-    logFile->println("Conexion cerrada");
-
     hmiClients->removeOne(hmiClient);
 
     disconnect(hmiClient, &HMIClient::hmiClientClosed, this, &HMIServerManager::hmiClientDisconnected);
