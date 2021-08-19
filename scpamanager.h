@@ -31,12 +31,6 @@ class SCPAManager : public QObject
         LogFile *logFile = nullptr;
 
         // Hilos
-        /*
-         * Tiempo de espera maximo en ms de espera antes de cerrar
-         * un hilo por la fuerza.
-         */
-        const int threadExitTimeOut = 2000;
-
         // TUI
         QThread *tuiThread = nullptr;
         TUIManager *tuiManager = nullptr;

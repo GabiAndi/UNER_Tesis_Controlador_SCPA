@@ -11,6 +11,10 @@
 
 #include <QObject>
 #include <QTcpSocket>
+#include <QThread>
+#include <QByteArray>
+
+#include "hmiprotocolmanager.h"
 
 class HMIClient : public QObject
 {
@@ -20,8 +24,13 @@ class HMIClient : public QObject
         explicit HMIClient(QTcpSocket *tcpSocket, QObject *parent = nullptr);
         ~HMIClient();
 
+        void disconnect();
+
     private:
         QTcpSocket *tcpSocket = nullptr;
+
+        HMIProtocolManager *hmiProtocolManager = nullptr;
+        QThread *hmiProtocolThread = nullptr;
 
     public slots:
         void hmiClientDisconnected();
@@ -29,6 +38,8 @@ class HMIClient : public QObject
 
     signals:
         void hmiClientClosed(HMIClient *hmiClient);
+
+        void hmiClientReadProtocol(const QByteArray data);
 };
 
 #endif // HMICLIENT_H

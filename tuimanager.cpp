@@ -44,7 +44,7 @@ void TUIManager::consoleReadyLine(const QString &line)
     // Comando de cierre
     if (line == "exit")
     {
-        *consoleOutput << "Cerrando programa constrolador" << Qt::endl;
+        *consoleOutput << "Cerrando programa controlador" << Qt::endl;
 
         delete consoleListener;
 

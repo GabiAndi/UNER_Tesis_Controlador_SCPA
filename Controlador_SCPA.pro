@@ -17,6 +17,7 @@ LIBS +=
 SOURCES += \
         consolelistener.cpp \
         hmiclient.cpp \
+        hmiprotocolmanager.cpp \
         hmiservermanager.cpp \
         logfile.cpp \
         main.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
 HEADERS += \
         consolelistener.h \
         hmiclient.h \
+        hmiprotocolmanager.h \
         hmiservermanager.h \
         logfile.h \
         scpamanager.h \

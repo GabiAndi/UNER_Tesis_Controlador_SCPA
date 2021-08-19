@@ -15,11 +15,11 @@ SCPAManager::~SCPAManager()
     // Cierre de hilos
     // TUI
     tuiThread->quit();
-    tuiThread->wait(threadExitTimeOut);
+    tuiThread->wait();
 
     // HMI Server
     hmiServerThread->quit();
-    hmiServerThread->wait(threadExitTimeOut);
+    hmiServerThread->wait();
 
     // TUI
     delete tuiManager;

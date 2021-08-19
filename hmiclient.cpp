@@ -7,11 +7,35 @@ HMIClient::HMIClient(QTcpSocket *tcpSocket, QObject *parent) : QObject(parent)
     // Comunicacion
     connect(this->tcpSocket, &QTcpSocket::disconnected, this, &HMIClient::hmiClientDisconnected);
     connect(this->tcpSocket, &QTcpSocket::readyRead, this, &HMIClient::hmiClientReadData);
+
+    // Protocolo
+    hmiProtocolManager = new HMIProtocolManager();
+    hmiProtocolThread = new QThread(this);
+
+    hmiProtocolManager->moveToThread(hmiProtocolThread);
+
+    connect(hmiProtocolThread, &QThread::started, hmiProtocolManager, &HMIProtocolManager::init);
+    connect(this, &HMIClient::hmiClientReadProtocol, hmiProtocolManager, &HMIProtocolManager::readProtocol);
+
+    hmiProtocolThread->start();
 }
 
 HMIClient::~HMIClient()
 {
+    // Se finaliza el hilo del analisis de paquete
+    hmiProtocolThread->quit();
+    hmiProtocolThread->wait();
+
+    delete hmiProtocolManager;
+    delete hmiProtocolThread;
+
+    // Se borra el socket
     delete tcpSocket;
+}
+
+void HMIClient::disconnect()
+{
+    tcpSocket->disconnectFromHost();
 }
 
 void HMIClient::hmiClientDisconnected()
@@ -21,5 +45,6 @@ void HMIClient::hmiClientDisconnected()
 
 void HMIClient::hmiClientReadData()
 {
-    qDebug() << tcpSocket->readAll();
+    // Interpretacion de los comandos enviados por los clientes
+    emit hmiClientReadProtocol(tcpSocket->readAll());
 }
