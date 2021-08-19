@@ -12,7 +12,20 @@
 
 #include <QObject>
 #include <QByteArray>
-#include <QDebug>
+
+class HMIProtocolPackage : public QObject
+{
+        Q_OBJECT
+
+    public:
+        explicit HMIProtocolPackage(QObject *parent = nullptr);
+        ~HMIProtocolPackage();
+
+        // Paquete
+        QByteArray packageReadData;
+
+        uint8_t packageReadState = 0;
+};
 
 class HMIProtocolManager : public QObject
 {
@@ -21,6 +34,9 @@ class HMIProtocolManager : public QObject
     public:
         explicit HMIProtocolManager(QObject *parent = nullptr);
         ~HMIProtocolManager();
+
+    private:
+        HMIProtocolPackage *hmiProtocolPackage = nullptr;
 
     public slots:
         void init();
