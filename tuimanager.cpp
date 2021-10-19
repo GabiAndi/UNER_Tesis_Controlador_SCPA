@@ -73,15 +73,17 @@ void TUIManager::consoleWelcome()
 {
     // Dialogo de bienvenida
     *consoleOutput << "----------------------------------------" << Qt::endl;
-    *consoleOutput << "| Controlador del sistema de aireacion |" << Qt::endl;
+    *consoleOutput << "Controlador del sistema de aireacion" << Qt::endl;
     *consoleOutput << "----------------------------------------" << Qt::endl;
-    *consoleOutput << "| Tesis de grado para recibir el       |" << Qt::endl;
-    *consoleOutput << "| titulo de Ingeniero en Mecatronica   |" << Qt::endl;
+    *consoleOutput << "Tesis de grado para recibir el" << Qt::endl;
+    *consoleOutput << "titulo de Ingeniero en Mecatronica" << Qt::endl;
     *consoleOutput << "----------------------------------------" << Qt::endl;
-    *consoleOutput << "| Gianluca Lovatto y Gabriel Aguirre   |" << Qt::endl;
-    *consoleOutput << "| Facultad de Ciencias de la           |" << Qt::endl;
-    *consoleOutput << "| Alimentacion de la Universidad       |" << Qt::endl;
-    *consoleOutput << "| Nacional de Entre Rios.              |" << Qt::endl;
+    *consoleOutput << "Gianluca Lovatto y Gabriel Aguirre" << Qt::endl;
+    *consoleOutput << "Facultad de Ciencias de la" << Qt::endl;
+    *consoleOutput << "Alimentacion de la Universidad" << Qt::endl;
+    *consoleOutput << "Nacional de Entre Rios." << Qt::endl;
+    *consoleOutput << "----------------------------------------" << Qt::endl;
+    *consoleOutput << "Qt: " << QT_VERSION_STR << Qt::endl;
     *consoleOutput << "----------------------------------------" << Qt::endl;
 }
 

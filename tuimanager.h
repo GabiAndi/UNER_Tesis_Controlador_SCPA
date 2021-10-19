@@ -13,6 +13,8 @@
 #include <QTextStream>
 #include <QProcess>
 
+#include <gnu/libc-version.h>
+
 #include "logfile.h"
 #include "consolelistener.h"
 
