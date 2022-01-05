@@ -3,7 +3,7 @@
 /* FECHA: 17/08/2021                                         */
 /*                                                           */
 /* DESCRIPCION:                                              */
-/* Codigo principal del programa.                            */
+/* Punto de entrada del programa.                            */
 /*************************************************************/
 
 #include <QCoreApplication>
@@ -17,6 +17,8 @@ int main(int argc, char *argv[])
 
     // Controlador de aplicacion
     SCPAManager *scpaManager = new SCPAManager();
+
+    scpaManager->setObjectName("SCPAManager");
 
     QObject::connect(scpaManager, &SCPAManager::destroyed, &a, &QCoreApplication::quit);
 

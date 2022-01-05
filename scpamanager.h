@@ -10,9 +10,13 @@
 #define SCPAMANAGER_H
 
 #include <QObject>
+
 #include <QThread>
 
 #include "logfile.h"
+
+#include "applicationstate.h"
+
 #include "tuimanager.h"
 #include "hmiservermanager.h"
 
@@ -29,6 +33,12 @@ class SCPAManager : public QObject
     private:
         // Archivo de logs
         LogFile *logFile = nullptr;
+
+        // Estados
+        // Estado de la aplicación
+        ApplicationState *applicationState = nullptr;
+
+        void applicationStateChanged();
 
         // Hilos
         // TUI

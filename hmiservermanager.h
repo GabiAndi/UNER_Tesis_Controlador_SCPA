@@ -8,12 +8,15 @@
 /* interfaz grafica).                                        */
 /* El servidor escuchara por el puerto 33600 las conexiones  */
 /* entrantes.                                                */
+/* El servidor solo aceptará una sesión de HMI, cualquier    */
+/* intento de conexión pedirá cerrar la sesión activa.       */
 /*************************************************************/
 
 #ifndef HMISERVERMANAGER_H
 #define HMISERVERMANAGER_H
 
 #include <QObject>
+
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QList>
@@ -29,6 +32,9 @@ class HMIServerManager : public QObject
         explicit HMIServerManager(QObject *parent = nullptr);
         ~HMIServerManager();
 
+    public slots:
+        void init();
+
     private:
         // Archivo de logs
         LogFile *logFile = nullptr;
@@ -38,18 +44,13 @@ class HMIServerManager : public QObject
 
         QTcpServer *hmiServer = nullptr;    // Servidor HMI
 
-        QList<HMIClient *> *hmiClients = nullptr;   // Sesiones activas HMI
+        HMIClient *hmiClient = nullptr;   // Sesion activa de HMI
 
-        uint8_t hmiClientsMax = 5;  // Numero maximo de sesiones por defecto
-
-    public slots:
-        void init();
-
+    private slots:
         // Conexiones
         void newConnection();
         void newConnectionError(const QAbstractSocket::SocketError socketError);
 
-    private slots:
         void hmiClientDisconnected(HMIClient *hmiClient);
 };
 

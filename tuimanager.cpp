@@ -1,22 +1,25 @@
 #include "tuimanager.h"
 
-TUIManager::TUIManager(QObject *parent) : QObject(parent)
+TUIManager::TUIManager(ApplicationState *applicationState, QObject *parent)
+    : QObject{parent}, applicationState{applicationState}
 {
-    // Archivo de log
-    logFile = new LogFile(this);
 
-    logFile->create("TUIManager");
-
-    logFile->println("Controlador de consola iniciado");
 }
 
 TUIManager::~TUIManager()
 {
+    // Detenemos el controlador de consola
+    consoleThread->quit();
+    consoleThread->wait();
+
+    delete consoleListener;
+    delete consoleThread;
+
     // Liberacion de memoria
     delete consoleOutput;
 
     // Cierre del archivo de log
-    logFile->println("Controlador de consola finalizado");
+    logFile->println("Finalizado");
 
     // Se borran los recursos utilizados
     delete logFile;
@@ -24,10 +27,26 @@ TUIManager::~TUIManager()
 
 void TUIManager::init()
 {
-    // Evento de consola
-    consoleListener = new ConsoleListener(this);
+    // Archivo de log
+    logFile = new LogFile(this);
+
+    logFile->println("Iniciado");
+
+    // Estados
+    // Estado de la aplicación
+    connect(this, &TUIManager::closedApplication, applicationState, &ApplicationState::closeApplication);
+
+    // Consola
+    consoleThread = new QThread(this);
+    consoleListener = new ConsoleListener();
+
+    consoleListener->moveToThread(consoleThread);
+
+    connect(consoleThread, &QThread::started, consoleListener, &ConsoleListener::init);
 
     connect(consoleListener, &ConsoleListener::newLine, this, &TUIManager::consoleReadyLine);
+
+    consoleThread->start();
 
     // Mostrar mensajes por consola
     consoleOutput = new QTextStream(stdout, QIODevice::OpenModeFlag::WriteOnly);
@@ -36,19 +55,17 @@ void TUIManager::init()
     consoleWait();
 
     // Mensaje de inicio
-    logFile->println("Controlador de consola cargado");
+    logFile->println("Cargado");
 }
 
-void TUIManager::consoleReadyLine(const QString &line)
+void TUIManager::consoleReadyLine(const QString line)
 {
     // Comando de cierre
     if (line == "exit")
     {
         *consoleOutput << "Cerrando programa controlador" << Qt::endl;
 
-        delete consoleListener;
-
-        emit closeApplication();
+        emit closedApplication();
 
         return;
     }
@@ -73,10 +90,10 @@ void TUIManager::consoleWelcome()
 {
     // Dialogo de bienvenida
     *consoleOutput << "----------------------------------------" << Qt::endl;
-    *consoleOutput << "Controlador del sistema de aireacion" << Qt::endl;
+    *consoleOutput << "Controlador del sistema de aireacion." << Qt::endl;
     *consoleOutput << "----------------------------------------" << Qt::endl;
     *consoleOutput << "Tesis de grado para recibir el" << Qt::endl;
-    *consoleOutput << "titulo de Ingeniero en Mecatronica" << Qt::endl;
+    *consoleOutput << "titulo de Ingeniero en Mecatronica." << Qt::endl;
     *consoleOutput << "----------------------------------------" << Qt::endl;
     *consoleOutput << "Gianluca Lovatto y Gabriel Aguirre" << Qt::endl;
     *consoleOutput << "Facultad de Ciencias de la" << Qt::endl;
@@ -84,6 +101,7 @@ void TUIManager::consoleWelcome()
     *consoleOutput << "Nacional de Entre Rios." << Qt::endl;
     *consoleOutput << "----------------------------------------" << Qt::endl;
     *consoleOutput << "Qt: " << QT_VERSION_STR << Qt::endl;
+    *consoleOutput << "GLibc: " << gnu_get_libc_version() << Qt::endl;
     *consoleOutput << "----------------------------------------" << Qt::endl;
 }
 

@@ -1,6 +1,7 @@
 #include "hmiclient.h"
 
-HMIClient::HMIClient(QTcpSocket *tcpSocket, QObject *parent) : QObject(parent)
+HMIClient::HMIClient(QTcpSocket *tcpSocket, QObject *parent)
+    : QObject{parent}
 {
     this->tcpSocket = tcpSocket;
 

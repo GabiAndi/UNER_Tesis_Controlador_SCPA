@@ -3,15 +3,14 @@
 /* FECHA: 17/08/2021                                         */
 /*                                                           */
 /* DESCRIPCION:                                              */
-/* Clase que permite leer datos de la consola de manera      */
-/* asincrona.                                                */
+/* Clase que permite leer datos de la consola.               */
 /*************************************************************/
 
 #ifndef CONSOLELISTENER_H
 #define CONSOLELISTENER_H
 
 #include <QObject>
-#include <QThread>
+
 #include <QSocketNotifier>
 
 #include <iostream>
@@ -24,13 +23,14 @@ class ConsoleListener : public QObject
         explicit ConsoleListener(QObject *parent = nullptr);
         ~ConsoleListener();
 
+    public slots:
+        void init();
+
     signals:
-        void newLine(const QString &line);
+        void newLine(const QString line);
 
     private:
         QSocketNotifier *socketNotifier = nullptr;
-
-        QThread *threadNotifier = nullptr;
 
     private slots:
         void getLine();

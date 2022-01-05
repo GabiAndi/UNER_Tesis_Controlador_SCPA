@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
@@ -16,27 +16,18 @@ find_package(Qt6 COMPONENTS Network REQUIRED)
 
 set(PROJECT_SOURCES
     main.cpp
-    scpamanager.cpp
-    scpamanager.h
-    tuimanager.cpp
-    tuimanager.h
-    logfile.cpp
-    logfile.h
-    consolelistener.cpp
-    consolelistener.h
-    hmiclient.cpp
-    hmiclient.h
-    hmiprotocolmanager.cpp
-    hmiprotocolmanager.h
-    hmiprotocolpackage.cpp
-    hmiprotocolpackage.h
-    hmiservermanager.cpp
-    hmiservermanager.h
+    scpamanager.h scpamanager.cpp
+    logfile.h logfile.cpp
+    applicationstate.h applicationstate.cpp
+    tuimanager.h tuimanager.cpp
+    consolelistener.h consolelistener.cpp
+    hmiclient.h hmiclient.cpp
+    hmiprotocolmanager.h hmiprotocolmanager.cpp
+    hmiprotocolpackage.h hmiprotocolpackage.cpp
+    hmiservermanager.h hmiservermanager.cpp
 )
 
-qt_add_executable(${PROJECT_NAME}
-    ${PROJECT_SOURCES}
-)
+qt_add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Network)

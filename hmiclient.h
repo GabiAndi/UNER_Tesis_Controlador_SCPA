@@ -10,6 +10,7 @@
 #define HMICLIENT_H
 
 #include <QObject>
+
 #include <QTcpSocket>
 #include <QThread>
 #include <QByteArray>

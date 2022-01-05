@@ -1,8 +1,24 @@
 #include "logfile.h"
 
-LogFile::LogFile(QObject *parent) : QObject(parent)
+LogFile::LogFile(QObject *parent)
+    : QObject{parent}
 {
+    // Se crea la carpeta en donde ira el archivo
+    if (!QDir(logSubdir).exists())
+    {
+        QDir().mkdir(logSubdir);
+    }
 
+    file.setFileName(logSubdir + "/" + parent->objectName() + ".log");
+
+    // Si el archivo existe se elimina
+    if (file.exists())
+    {
+        file.remove();
+    }
+
+    // Se abre el archivo para añadir contenido al final
+    file.open(QIODevice::OpenModeFlag::ReadWrite | QIODevice::OpenModeFlag::Append);
 }
 
 LogFile::~LogFile()
@@ -12,26 +28,6 @@ LogFile::~LogFile()
         file.flush();
         file.close();
     }
-}
-
-bool LogFile::create(const QString &fileName)
-{
-    // Se crea la carpeta en donde ira el archivo
-    if (!QDir(logSubdir).exists())
-    {
-        QDir().mkdir(logSubdir);
-    }
-
-    file.setFileName(logSubdir + "/" + fileName + ".log");
-
-    // Si el archivo existe se elimina
-    if (file.exists())
-    {
-        file.remove();
-    }
-
-    // Se abre el archivo para añadir contenido al final
-    return file.open(QIODevice::OpenModeFlag::ReadWrite | QIODevice::OpenModeFlag::Append);
 }
 
 QString LogFile::getTimeLog()

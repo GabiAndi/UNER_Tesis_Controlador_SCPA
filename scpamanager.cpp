@@ -2,12 +2,7 @@
 
 SCPAManager::SCPAManager(QObject *parent) : QObject(parent)
 {
-    // Archivo de log
-    logFile = new LogFile(this);
 
-    logFile->create("SCPAManager");
-
-    logFile->println("Controlador de aplicacion iniciado");
 }
 
 SCPAManager::~SCPAManager()
@@ -17,20 +12,18 @@ SCPAManager::~SCPAManager()
     tuiThread->quit();
     tuiThread->wait();
 
-    // HMI Server
-    hmiServerThread->quit();
-    hmiServerThread->wait();
-
-    // TUI
     delete tuiManager;
     delete tuiThread;
 
     // HMI Server
+    hmiServerThread->quit();
+    hmiServerThread->wait();
+
     delete hmiServerManager;
     delete hmiServerThread;
 
     // Cierre del archivo de log
-    logFile->println("Controlador de aplicacion finalizado");
+    logFile->println("Finalizado");
 
     // Se borran los recursos utilizados
     delete logFile;
@@ -38,15 +31,27 @@ SCPAManager::~SCPAManager()
 
 void SCPAManager::init()
 {
+    // Archivo de log
+    logFile = new LogFile(this);
+
+    logFile->println("Iniciado");
+
+    // Estados
+    // Estado de la applicación
+    applicationState = new ApplicationState(this);
+
+    connect(applicationState, &ApplicationState::closedApplication, this, &SCPAManager::deleteLater);
+
     // Hilos
     // TUI
     tuiThread = new QThread(this);
-    tuiManager = new TUIManager();
+    tuiManager = new TUIManager(applicationState);
 
     tuiManager->moveToThread(tuiThread);
 
+    tuiManager->setObjectName("TUIManager");
+
     connect(tuiThread, &QThread::started, tuiManager, &TUIManager::init);
-    connect(tuiManager, &TUIManager::closeApplication, this, &SCPAManager::deleteLater);
 
     tuiThread->start();
 
@@ -56,10 +61,17 @@ void SCPAManager::init()
 
     hmiServerManager->moveToThread(hmiServerThread);
 
+    hmiServerManager->setObjectName("HMIServerManager");
+
     connect(hmiServerThread, &QThread::started, hmiServerManager, &HMIServerManager::init);
 
     hmiServerThread->start();
 
     // Inicio
-    logFile->println("Controlador de aplicacion cargado");
+    logFile->println("Cargado");
+}
+
+void SCPAManager::applicationStateChanged()
+{
+
 }

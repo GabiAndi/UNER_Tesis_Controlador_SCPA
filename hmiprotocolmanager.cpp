@@ -1,6 +1,7 @@
 #include "hmiprotocolmanager.h"
 
-HMIProtocolManager::HMIProtocolManager(QObject *parent) : QObject(parent)
+HMIProtocolManager::HMIProtocolManager(QObject *parent)
+    : QObject{parent}
 {
 
 }
