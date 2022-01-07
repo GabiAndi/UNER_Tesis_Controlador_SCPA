@@ -15,9 +15,6 @@ TUIManager::~TUIManager()
     delete consoleListener;
     delete consoleThread;
 
-    // Liberacion de memoria
-    delete consoleOutput;
-
     // Cierre del archivo de log
     logFile->println("Finalizado");
 
@@ -32,7 +29,14 @@ void TUIManager::init()
 
     logFile->println("Iniciado");
 
-    // Consola
+    // Iniciamos la pantalla
+    // Iniciamos ncurses
+    initscr();
+    raw();
+    keypad(stdscr, TRUE);
+    noecho();
+
+    // Iniciamos la captura de la consola
     consoleThread = new QThread(this);
     consoleListener = new ConsoleListener();
 
@@ -40,15 +44,13 @@ void TUIManager::init()
 
     connect(consoleThread, &QThread::started, consoleListener, &ConsoleListener::init);
 
-    connect(consoleListener, &ConsoleListener::newLine, this, &TUIManager::consoleReadyLine);
+    connect(consoleListener, &ConsoleListener::newKey, this, &TUIManager::consoleNewKey);
 
     consoleThread->start();
 
     // Mostrar mensajes por consola
-    consoleOutput = new QTextStream(stdout, QIODevice::OpenModeFlag::WriteOnly);
-
-    consoleWelcome();
-    consoleWait();
+    /*consoleWelcome();
+    consoleWait();*/
 
     // Mensaje de inicio
     logFile->println("Cargado");
@@ -56,27 +58,31 @@ void TUIManager::init()
 
 void TUIManager::hmiServerStatus(hmi_server_status_t status)
 {
-    *consoleOutput << "IP servidor: " << status.serverIP << Qt::endl;
+    /**consoleOutput << "IP servidor: " << status.serverIP << Qt::endl;
     *consoleOutput << "IP cliente: " << status.clientIP << Qt::endl;
     *consoleOutput << "Puerto usado: " << status.port << Qt::endl;
 
-    consoleWait();
+    consoleWait();*/
 }
 
-void TUIManager::consoleReadyLine(const QString line)
+void TUIManager::consoleNewKey(const int key)
 {
-    // Comando convertido a minusculas
-    const QString cmd = line.toLower();
+    clear();
 
-    // Comando de cierre
-    if (cmd == "exit")
+    printw ("La tecla tiene codigo: ");
+            attron (A_BOLD);
+            printw ("%d\n", key);
+            attroff (A_BOLD);
+
+    refresh();
+
+    // Comando de cierre con la tecla ctl + q
+    if (key == 17)
     {
-        *consoleOutput << "Cerrando programa controlador" << Qt::endl;
-
         emit closedApplication();
     }
 
-    // Comando para limpiar la pantalla
+    /*// Comando para limpiar la pantalla
     else if (cmd == "clear")
     {
         consoleClear();
@@ -95,13 +101,15 @@ void TUIManager::consoleReadyLine(const QString line)
     {
         *consoleOutput << "Comando no valido para: " << line << Qt::endl;
         consoleWait();
-    }
+    }*/
 }
 
 void TUIManager::consoleWelcome()
 {
     // Dialogo de bienvenida
-    *consoleOutput << "----------------------------------------" << Qt::endl;
+    /**printw("----------------------------------------");
+
+    consoleOutput <<  << Qt::endl;
     *consoleOutput << "Controlador del sistema de aireacion." << Qt::endl;
     *consoleOutput << "----------------------------------------" << Qt::endl;
     *consoleOutput << "Tesis de grado para recibir el" << Qt::endl;
@@ -114,18 +122,25 @@ void TUIManager::consoleWelcome()
     *consoleOutput << "----------------------------------------" << Qt::endl;
     *consoleOutput << "Qt: " << QT_VERSION_STR << Qt::endl;
     *consoleOutput << "GLibc: " << gnu_get_libc_version() << Qt::endl;
-    *consoleOutput << "----------------------------------------" << Qt::endl;
+    *consoleOutput << "----------------------------------------" << Qt::endl;*/
 }
 
 void TUIManager::consoleClear()
 {
     // Se limpia la pantalla
-    QProcess::execute("clear", QStringList());
+    /*QProcess::execute("clear", QStringList());*/
 }
 
 void TUIManager::consoleWait()
 {
     // Mensaje de espera
-    *consoleOutput << "Ingrese comando: ";
-    consoleOutput->flush();
+    /**consoleOutput << "Ingrese comando: ";
+    consoleOutput->flush();*/
+}
+
+void TUIManager::closeApplication()
+{
+    endwin();
+
+    emit closedApplication();
 }

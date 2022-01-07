@@ -13,14 +13,19 @@
 #include <QObject>
 
 #include <QThread>
-#include <QTextStream>
-#include <QProcess>
+
+#include <ncurses.h>
+#undef timeout
+#include <menu.h>
 
 #include <gnu/libc-version.h>
 
 #include "logfile.h"
 #include "consolelistener.h"
 #include "datatypes.h"
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+#define CTRLD 	4
 
 class TUIManager : public QObject
 {
@@ -48,15 +53,15 @@ class TUIManager : public QObject
         QThread *consoleThread = nullptr;
         ConsoleListener *consoleListener = nullptr;
 
-        // Salida de consola
-        QTextStream *consoleOutput = nullptr;
-
         void consoleWelcome();
         void consoleClear();
         void consoleWait();
 
+        // Aplicacion
+        void closeApplication();
+
     private slots:
-        void consoleReadyLine(const QString line);
+        void consoleNewKey(const int key);
 };
 
 #endif // TUIMANAGER_H

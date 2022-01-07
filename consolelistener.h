@@ -13,7 +13,8 @@
 
 #include <QSocketNotifier>
 
-#include <iostream>
+#include <ncurses.h>
+#undef timeout
 
 class ConsoleListener : public QObject
 {
@@ -27,13 +28,13 @@ class ConsoleListener : public QObject
         void init();
 
     signals:
-        void newLine(const QString line);
+        void newKey(const int key);
 
     private:
         QSocketNotifier *socketNotifier = nullptr;
 
     private slots:
-        void getLine();
+        void getKeyboard();
 };
 
 #endif // CONSOLELISTENER_H

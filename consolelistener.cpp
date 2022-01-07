@@ -17,14 +17,12 @@ void ConsoleListener::init()
     // Socket notifier que esta acargo de la entrada por consola
     socketNotifier = new QSocketNotifier(fileno(stdin), QSocketNotifier::Type::Read);
 
-    connect(socketNotifier, &QSocketNotifier::activated, this, &ConsoleListener::getLine);
+    connect(socketNotifier, &QSocketNotifier::activated, this, &ConsoleListener::getKeyboard);
 }
 
-void ConsoleListener::getLine()
+void ConsoleListener::getKeyboard()
 {
-    std::string line;
+    int key = getch();
 
-    std::getline(std::cin, line);
-
-    emit newLine(QString::fromStdString(line));
+    emit newKey(key);
 }
