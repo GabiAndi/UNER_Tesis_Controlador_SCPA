@@ -11,6 +11,8 @@
 
 #include <QObject>
 
+#include <QSize>
+
 typedef struct
 {
     uint16_t dataMaxLength;

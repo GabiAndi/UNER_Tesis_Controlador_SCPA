@@ -16,16 +16,12 @@
 
 #include <ncurses.h>
 #undef timeout
-#include <menu.h>
 
 #include <gnu/libc-version.h>
 
 #include "logfile.h"
 #include "consolelistener.h"
 #include "datatypes.h"
-
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
-#define CTRLD 	4
 
 class TUIManager : public QObject
 {
@@ -54,8 +50,43 @@ class TUIManager : public QObject
         ConsoleListener *consoleListener = nullptr;
 
         void consoleWelcome();
-        void consoleClear();
-        void consoleWait();
+        void consoleMenu();
+        void consolePrintKeyboardCode(int key);
+
+        QSize screenGetSize(WINDOW *win = stdscr);
+
+        void consoleInitColors();
+
+        enum ConsoleColor : short
+        {
+            ALERT = 1,
+            WARNING,
+            INFO
+        };
+
+        enum ConsoleCommand : short
+        {
+            EXIT,
+            HMI_SERVER_INFO
+        };
+
+        typedef struct
+        {
+            QString text;
+            ConsoleCommand id;
+        }tui_menu_command_t;
+
+        typedef struct
+        {
+            int menuIndex;
+        }tui_state_t;
+
+        tui_state_t *tuiState = nullptr;
+
+        QList<tui_menu_command_t> *menuCommands = nullptr;
+
+        // Comandos
+        void executeCommand(const ConsoleCommand id);
 
         // Aplicacion
         void closeApplication();
