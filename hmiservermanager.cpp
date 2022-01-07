@@ -8,9 +8,16 @@ HMIServerManager::HMIServerManager(QObject *parent)
 
 HMIServerManager::~HMIServerManager()
 {
-    // Se elimina el cliente que esta conectado
+    // Se finaliza el hilo del analisis de paquete
+    clientProtocolThread->quit();
+    clientProtocolThread->wait();
 
-    delete hmiClient;
+    delete clientProtocolManager;
+    delete clientProtocolThread;
+
+    // Se libera la memoria
+    delete clientTcpSocket;
+    delete hmiServer;
 
     // Cierre del archivo de log
     logFile->println("Finalizado");
@@ -32,7 +39,7 @@ void HMIServerManager::init()
     connect(hmiServer, &QTcpServer::newConnection, this, &HMIServerManager::newConnection);
     connect(hmiServer, &QTcpServer::acceptError, this, &HMIServerManager::newConnectionError);
 
-    if (hmiServer->listen(QHostAddress::AnyIPv4, hmiServerPort))
+    if (hmiServer->listen(QHostAddress::AnyIPv4, HMI_SERVER_PORT))
     {
         logFile->println("Cargado");
     }
@@ -45,9 +52,25 @@ void HMIServerManager::init()
 
 void HMIServerManager::newConnection()
 {
-    //HMIClient *newClient = new HMIClient(hmiServer->nextPendingConnection(), this);
+    // Conexión
+    clientTcpSocket = hmiServer->nextPendingConnection();
 
-    //connect(newClient, &HMIClient::hmiClientClosed, this, &HMIServerManager::hmiClientDisconnected);
+    connect(clientTcpSocket, &QTcpSocket::readyRead, this, &HMIServerManager::readData);
+    connect(clientTcpSocket, &QTcpSocket::disconnected, this, &HMIServerManager::clientDisconnected);
+
+    // Protocolo
+    clientProtocolThread = new QThread(this);
+    clientProtocolManager = new HMIProtocolManager();
+
+    clientProtocolManager->moveToThread(clientProtocolThread);
+
+    connect(clientProtocolThread, &QThread::started, clientProtocolManager, &HMIProtocolManager::init);
+
+    connect(this, &HMIServerManager::readProtocol, clientProtocolManager, &HMIProtocolManager::readProtocol);
+
+    clientProtocolThread->start();
+
+    logFile->println("Nuevo cliente conectado desde " + clientTcpSocket->localAddress().toString());
 }
 
 void HMIServerManager::newConnectionError(const QAbstractSocket::SocketError socketError)
@@ -55,12 +78,29 @@ void HMIServerManager::newConnectionError(const QAbstractSocket::SocketError soc
     logFile->println(QString::asprintf("Error de conexion: %d", socketError));
 }
 
-void HMIServerManager::hmiClientDisconnected(HMIClient *hmiClient)
+void HMIServerManager::clientDisconnected()
 {
     // Se cierra la conexión del cliente
-    /*hmiClients->removeOne(hmiClient);
+    logFile->println("Cliente desconectado desde " + clientTcpSocket->localAddress().toString());
 
-    disconnect(hmiClient, &HMIClient::hmiClientClosed, this, &HMIServerManager::hmiClientDisconnected);
+    // Se finaliza el hilo del analisis de paquete
+    clientProtocolThread->quit();
+    clientProtocolThread->wait();
 
-    hmiClient->deleteLater();*/
+    // Se elimina la memoria
+    clientProtocolManager->deleteLater();
+    clientProtocolThread->deleteLater();
+
+    clientTcpSocket->deleteLater();
+
+    clientProtocolManager = nullptr;
+    clientProtocolThread = nullptr;
+
+    clientTcpSocket = nullptr;
+}
+
+void HMIServerManager::readData()
+{
+    // Interpretacion de los comandos enviados por los clientes
+    emit readProtocol(clientTcpSocket->readAll());
 }

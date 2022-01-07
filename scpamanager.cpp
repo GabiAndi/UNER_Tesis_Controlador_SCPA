@@ -22,6 +22,10 @@ SCPAManager::~SCPAManager()
     delete hmiServerManager;
     delete hmiServerThread;
 
+    // Estados
+    // Estado de la aplicación
+    delete applicationState;
+
     // Cierre del archivo de log
     logFile->println("Finalizado");
 

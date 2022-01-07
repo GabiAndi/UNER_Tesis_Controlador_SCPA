@@ -9,35 +9,53 @@ HMIProtocolManager::HMIProtocolManager(QObject *parent)
 HMIProtocolManager::~HMIProtocolManager()
 {
     // Paquete
-    delete hmiProtocolPackage;
+    delete hmi_protocol_package;
 
     // Timer
-    delete readProtocolTimer;
+    delete timeOutTimer;
 }
 
-void HMIProtocolManager::hmiNewCommand(uint8_t &cmd, QByteArray &payload)
+void HMIProtocolManager::newCommand(uint8_t &cmd, QByteArray &payload)
 {
     // Se analiza el comando recibido
     switch (cmd)
     {
-        case 0xFF:
+        case 0xA0:
+            if (payload.length() != 1)
+                break;
 
+            if ((uint8_t)(payload.at(0)) != (uint8_t)(0xFF))
+                break;
+
+            // Codigo
             break;
 
         default:
-
             break;
     }
 }
 
 void HMIProtocolManager::init()
 {
-    hmiProtocolPackage = new HMIProtocolPackage(this);
+    // Paquete de datos
+    hmi_protocol_package = new hmi_protocol_package_t;
+
+    hmi_protocol_package->dataMaxLength = 1;  // Tamaño en Kb maximo del buffer de lectura
+    hmi_protocol_package->timeOutMs = 100;  // Tiempo maximo en ms hasta que se descarta el paquete
+
+    hmi_protocol_package->packageReadData.clear();
+
+    hmi_protocol_package->packageReadIndex = 0;
+    hmi_protocol_package->packageReadState = 0;
+
+    hmi_protocol_package->packageReadPayloadLength = 0;
+    hmi_protocol_package->packageReadCmd = 0x00;
+    hmi_protocol_package->packageReadPayload.clear();
 
     // Timer de TimeOut
-    readProtocolTimer = new QTimer(this);
+    timeOutTimer = new QTimer(this);
 
-    connect(readProtocolTimer, &QTimer::timeout, this, &HMIProtocolManager::readProtocolReset);
+    connect(timeOutTimer, &QTimer::timeout, this, &HMIProtocolManager::readReset);
 }
 
 void HMIProtocolManager::readProtocol(const QByteArray data)
@@ -46,32 +64,33 @@ void HMIProtocolManager::readProtocol(const QByteArray data)
      * Se añaden los datos nuevos a los anteriores, en el caso de que el paquete venga por partes.
      * Solo si el tamaño no supera al maximo permitido.
      */
-    if ((hmiProtocolPackage->packageReadData.length() + data.length()) <= (readProtocolDataMaxLength * 1024))
+    if ((hmi_protocol_package->packageReadData.length() + data.length()) <=
+            (hmi_protocol_package->dataMaxLength * 1024))
     {
-        hmiProtocolPackage->packageReadData.append(data);
+        hmi_protocol_package->packageReadData.append(data);
     }
 
     // Hasta que no se terminen de analizar todos los datos en cola
-    while (hmiProtocolPackage->packageReadAvailable())
+    while (hmi_protocol_package->packageReadIndex < hmi_protocol_package->packageReadData.length())
     {
         // Se lee el proximo byte del buffer si esta disponible y se aumenta el indice de lectura
-        uint8_t readByte = hmiProtocolPackage->packageReadNextByte();
+        uint8_t readByte = hmi_protocol_package->packageReadData.at(hmi_protocol_package->packageReadIndex++);
 
         // Maquina de estados
-        switch (hmiProtocolPackage->packageReadState)
+        switch (hmi_protocol_package->packageReadState)
         {
             // Primer byte de cabecera
             case 0:
                 if (readByte == 'S')
                 {
-                    readProtocolTimer->start(readProtocolTimeOutMs);
+                    timeOutTimer->start(hmi_protocol_package->timeOutMs);
 
-                    hmiProtocolPackage->packageReadState = 1;
+                    hmi_protocol_package->packageReadState = 1;
                 }
 
                 else
                 {
-                    readProtocolReset();
+                    readReset();
                 }
 
                 break;
@@ -80,12 +99,12 @@ void HMIProtocolManager::readProtocol(const QByteArray data)
             case 1:
                 if (readByte == 'C')
                 {
-                    hmiProtocolPackage->packageReadState = 2;
+                    hmi_protocol_package->packageReadState = 2;
                 }
 
                 else
                 {
-                    readProtocolReset();
+                    readReset();
                 }
 
                 break;
@@ -94,12 +113,12 @@ void HMIProtocolManager::readProtocol(const QByteArray data)
             case 2:
                 if (readByte == 'P')
                 {
-                    hmiProtocolPackage->packageReadState = 3;
+                    hmi_protocol_package->packageReadState = 3;
                 }
 
                 else
                 {
-                    readProtocolReset();
+                    readReset();
                 }
 
                 break;
@@ -108,12 +127,12 @@ void HMIProtocolManager::readProtocol(const QByteArray data)
             case 3:
                 if (readByte == 'A')
                 {
-                    hmiProtocolPackage->packageReadState = 4;
+                    hmi_protocol_package->packageReadState = 4;
                 }
 
                 else
                 {
-                    readProtocolReset();
+                    readReset();
                 }
 
                 break;
@@ -122,83 +141,80 @@ void HMIProtocolManager::readProtocol(const QByteArray data)
             case 4:
                 if (readByte == ':')
                 {
-                    hmiProtocolPackage->packageReadState = 5;
+                    hmi_protocol_package->packageReadState = 5;
                 }
 
                 else
                 {
-                    readProtocolReset();
+                    readReset();
                 }
 
                 break;
 
             // Byte 1 de tamaño
             case 5:
-                hmiProtocolPackage->packageReadPayloadLength = (uint16_t)(readByte);
+                hmi_protocol_package->packageReadPayloadLength = (uint16_t)(readByte);
 
-                hmiProtocolPackage->packageReadState = 6;
+                hmi_protocol_package->packageReadState = 6;
 
                 break;
 
             // Byte 2 de tamaño
             case 6:
-                hmiProtocolPackage->packageReadPayloadLength |= ((uint16_t)(readByte) << 8);
+                hmi_protocol_package->packageReadPayloadLength |= ((uint16_t)(readByte) << 8);
 
-                hmiProtocolPackage->packageReadState = 7;
+                hmi_protocol_package->packageReadState = 7;
 
                 break;
 
             // Comando
             case 7:
-                hmiProtocolPackage->packageReadCmd = readByte;
+                hmi_protocol_package->packageReadCmd = readByte;
 
-                hmiProtocolPackage->packageReadState = 8;
+                hmi_protocol_package->packageReadState = 8;
 
                 break;
 
             // Payload
             case 8:
                 // Si quedan datos del payload por leer
-                if (hmiProtocolPackage->packageReadPayloadLength > 0)
+                if (hmi_protocol_package->packageReadPayloadLength > 0)
                 {
-                    hmiProtocolPackage->packageReadPayload.append(readByte);
+                    hmi_protocol_package->packageReadPayload.append(readByte);
 
-                    hmiProtocolPackage->packageReadPayloadLength--;
+                    hmi_protocol_package->packageReadPayloadLength--;
                 }
 
-                else
+                // Si se recibio todo el paquete
+                if (hmi_protocol_package->packageReadPayloadLength == 0)
                 {
                     // Se analiza el paquete
-                    hmiNewCommand(hmiProtocolPackage->packageReadCmd, hmiProtocolPackage->packageReadPayload);
+                    newCommand(hmi_protocol_package->packageReadCmd, hmi_protocol_package->packageReadPayload);
 
-                    // Finalizo correctamento
-                    if (readByte == 0xFF)
-                    {
-
-                    }
-
-                    // Error de formato de paquete
-                    else
-                    {
-
-                    }
-
-                    readProtocolReset();
+                    readReset();
                 }
 
                 break;
 
             // Caso por defecto
             default:
-                readProtocolReset();
+                readReset();
 
                 break;
         }
     }
 }
 
-void HMIProtocolManager::readProtocolReset()
+void HMIProtocolManager::readReset()
 {
-    readProtocolTimer->stop();
-    hmiProtocolPackage->packageReadReset();
+    timeOutTimer->stop();
+
+    hmi_protocol_package->packageReadData.remove(0, hmi_protocol_package->packageReadIndex);
+
+    hmi_protocol_package->packageReadIndex = 0;
+    hmi_protocol_package->packageReadState = 0;
+
+    hmi_protocol_package->packageReadPayloadLength = 0;
+    hmi_protocol_package->packageReadCmd = 0x00;
+    hmi_protocol_package->packageReadPayload.clear();
 }

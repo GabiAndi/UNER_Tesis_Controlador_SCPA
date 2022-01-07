@@ -60,8 +60,11 @@ void TUIManager::init()
 
 void TUIManager::consoleReadyLine(const QString line)
 {
+    // Comando convertido a minusculas
+    const QString cmd = line.toLower();
+
     // Comando de cierre
-    if (line == "exit")
+    if (cmd == "exit")
     {
         *consoleOutput << "Cerrando programa controlador" << Qt::endl;
 
@@ -71,7 +74,7 @@ void TUIManager::consoleReadyLine(const QString line)
     }
 
     // Comando para limpiar la pantalla
-    else if (line == "clear")
+    else if (cmd == "clear")
     {
         consoleClear();
         consoleWelcome();

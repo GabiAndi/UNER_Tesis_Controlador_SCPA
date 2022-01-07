@@ -15,7 +15,7 @@
 #include <QByteArray>
 #include <QTimer>
 
-#include "hmiprotocolpackage.h"
+#include <QDebug>
 
 class HMIProtocolManager : public QObject
 {
@@ -25,23 +25,37 @@ class HMIProtocolManager : public QObject
         explicit HMIProtocolManager(QObject *parent = nullptr);
         ~HMIProtocolManager();
 
-    private:
-        HMIProtocolPackage *hmiProtocolPackage = nullptr;
-
-        QTimer *readProtocolTimer = nullptr;
-
-        uint16_t readProtocolDataMaxLength = 1;  // Tamaño en Kb maximo del buffer de lectura
-        uint32_t readProtocolTimeOutMs = 100;  // Tiempo maximo en ms hasta que se descarta el paquete
-
-        void hmiNewCommand(uint8_t &cmd, QByteArray &payload);
-
     public slots:
         void init();
 
         void readProtocol(const QByteArray data);
 
+    private:
+        // Timer del paquete de datos
+        QTimer *timeOutTimer = nullptr;
+
+        void newCommand(uint8_t &cmd, QByteArray &payload);
+
+        // Paquete de datos
+        typedef struct
+        {
+            uint16_t dataMaxLength;
+            uint32_t timeOutMs;
+
+            QByteArray packageReadData;
+
+            uint16_t packageReadIndex;
+            uint8_t packageReadState;
+
+            uint16_t packageReadPayloadLength;
+            uint8_t packageReadCmd;
+            QByteArray packageReadPayload;
+        }hmi_protocol_package_t;
+
+        hmi_protocol_package_t *hmi_protocol_package = nullptr;
+
     private slots:
-        void readProtocolReset();
+        void readReset();
 };
 
 #endif // HMIPROTOCOLMANAGER_H

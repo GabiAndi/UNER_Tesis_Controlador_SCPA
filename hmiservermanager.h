@@ -19,10 +19,13 @@
 
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QList>
+#include <QThread>
+#include <QByteArray>
 
 #include "logfile.h"
-#include "hmiclient.h"
+#include "hmiprotocolmanager.h"
+
+#define HMI_SERVER_PORT           33600
 
 class HMIServerManager : public QObject
 {
@@ -32,6 +35,9 @@ class HMIServerManager : public QObject
         explicit HMIServerManager(QObject *parent = nullptr);
         ~HMIServerManager();
 
+    signals:
+        void readProtocol(const QByteArray data);
+
     public slots:
         void init();
 
@@ -40,18 +46,22 @@ class HMIServerManager : public QObject
         LogFile *logFile = nullptr;
 
         // Conexiones
-        const int hmiServerPort = 33600;
-
         QTcpServer *hmiServer = nullptr;    // Servidor HMI
 
-        HMIClient *hmiClient = nullptr;   // Sesion activa de HMI
+        QTcpSocket *clientTcpSocket = nullptr;
+
+        QThread *clientProtocolThread = nullptr;
+        HMIProtocolManager *clientProtocolManager = nullptr;
 
     private slots:
         // Conexiones
         void newConnection();
         void newConnectionError(const QAbstractSocket::SocketError socketError);
 
-        void hmiClientDisconnected(HMIClient *hmiClient);
+        void clientDisconnected();
+
+        // Datos
+        void readData();
 };
 
 #endif // HMISERVERMANAGER_H

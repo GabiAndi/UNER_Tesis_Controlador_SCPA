@@ -21,10 +21,8 @@ set(PROJECT_SOURCES
     applicationstate.h applicationstate.cpp
     tuimanager.h tuimanager.cpp
     consolelistener.h consolelistener.cpp
-    hmiclient.h hmiclient.cpp
-    hmiprotocolmanager.h hmiprotocolmanager.cpp
-    hmiprotocolpackage.h hmiprotocolpackage.cpp
     hmiservermanager.h hmiservermanager.cpp
+    hmiprotocolmanager.h hmiprotocolmanager.cpp
 )
 
 qt_add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
