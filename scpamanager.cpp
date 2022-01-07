@@ -22,10 +22,6 @@ SCPAManager::~SCPAManager()
     delete hmiServerManager;
     delete hmiServerThread;
 
-    // Estados
-    // Estado de la aplicación
-    delete applicationState;
-
     // Cierre del archivo de log
     logFile->println("Finalizado");
 
@@ -40,22 +36,18 @@ void SCPAManager::init()
 
     logFile->println("Iniciado");
 
-    // Estados
-    // Estado de la applicación
-    applicationState = new ApplicationState(this);
-
-    connect(applicationState, &ApplicationState::closedApplication, this, &SCPAManager::deleteLater);
-
     // Hilos
     // TUI
     tuiThread = new QThread(this);
-    tuiManager = new TUIManager(applicationState);
+    tuiManager = new TUIManager();
 
     tuiManager->moveToThread(tuiThread);
 
     tuiManager->setObjectName("TUIManager");
 
     connect(tuiThread, &QThread::started, tuiManager, &TUIManager::init);
+
+    connect(tuiManager, &TUIManager::closedApplication, this, &SCPAManager::deleteLater);
 
     tuiThread->start();
 
@@ -73,9 +65,4 @@ void SCPAManager::init()
 
     // Inicio
     logFile->println("Cargado");
-}
-
-void SCPAManager::applicationStateChanged()
-{
-
 }

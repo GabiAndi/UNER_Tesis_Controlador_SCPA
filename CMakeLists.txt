@@ -18,7 +18,6 @@ set(PROJECT_SOURCES
     main.cpp
     scpamanager.h scpamanager.cpp
     logfile.h logfile.cpp
-    applicationstate.h applicationstate.cpp
     tuimanager.h tuimanager.cpp
     consolelistener.h consolelistener.cpp
     hmiservermanager.h hmiservermanager.cpp

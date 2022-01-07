@@ -1,7 +1,7 @@
 #include "tuimanager.h"
 
-TUIManager::TUIManager(ApplicationState *applicationState, QObject *parent)
-    : QObject{parent}, applicationState{applicationState}
+TUIManager::TUIManager(QObject *parent)
+    : QObject{parent}
 {
 
 }
@@ -31,10 +31,6 @@ void TUIManager::init()
     logFile = new LogFile(this);
 
     logFile->println("Iniciado");
-
-    // Estados
-    // Estado de la aplicación
-    connect(this, &TUIManager::closedApplication, applicationState, &ApplicationState::closeApplication);
 
     // Consola
     consoleThread = new QThread(this);
@@ -69,8 +65,6 @@ void TUIManager::consoleReadyLine(const QString line)
         *consoleOutput << "Cerrando programa controlador" << Qt::endl;
 
         emit closedApplication();
-
-        return;
     }
 
     // Comando para limpiar la pantalla
@@ -78,15 +72,15 @@ void TUIManager::consoleReadyLine(const QString line)
     {
         consoleClear();
         consoleWelcome();
+        consoleWait();
     }
 
     // Comando no conocido
     else
     {
         *consoleOutput << "Comando no valido para: " << line << Qt::endl;
+        consoleWait();
     }
-
-    consoleWait();
 }
 
 void TUIManager::consoleWelcome()

@@ -18,9 +18,8 @@
 
 #include <gnu/libc-version.h>
 
-#include "applicationstate.h"
-
 #include "logfile.h"
+
 #include "consolelistener.h"
 
 class TUIManager : public QObject
@@ -28,7 +27,7 @@ class TUIManager : public QObject
         Q_OBJECT
 
     public:
-        explicit TUIManager(ApplicationState *applicationState, QObject *parent = nullptr);
+        explicit TUIManager(QObject *parent = nullptr);
         ~TUIManager();
 
     signals:
@@ -38,10 +37,6 @@ class TUIManager : public QObject
         void init();
 
     private:
-        // Estados
-        // Estado de la applicación
-        ApplicationState *applicationState;
-
         // Archivo de logs
         LogFile *logFile = nullptr;
 
