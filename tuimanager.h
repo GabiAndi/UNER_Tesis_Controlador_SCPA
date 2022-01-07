@@ -19,8 +19,8 @@
 #include <gnu/libc-version.h>
 
 #include "logfile.h"
-
 #include "consolelistener.h"
+#include "datatypes.h"
 
 class TUIManager : public QObject
 {
@@ -33,8 +33,12 @@ class TUIManager : public QObject
     signals:
         void closedApplication();
 
+        void getHmiServerStatus();
+
     public slots:
         void init();
+
+        void hmiServerStatus(hmi_server_status_t status);
 
     private:
         // Archivo de logs

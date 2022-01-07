@@ -20,10 +20,10 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QThread>
-#include <QByteArray>
 
 #include "logfile.h"
 #include "hmiprotocolmanager.h"
+#include "datatypes.h"
 
 #define HMI_SERVER_PORT           33600
 
@@ -38,8 +38,12 @@ class HMIServerManager : public QObject
     signals:
         void readProtocol(const QByteArray data);
 
+        void hmiServerStatus(hmi_server_status_t status);
+
     public slots:
         void init();
+
+        void getHmiServerStatus();
 
     private:
         // Archivo de logs

@@ -63,6 +63,10 @@ void SCPAManager::init()
 
     hmiServerThread->start();
 
+    // Interconexiones
+    connect(tuiManager, &TUIManager::getHmiServerStatus, hmiServerManager, &HMIServerManager::getHmiServerStatus);
+    connect(hmiServerManager, &HMIServerManager::hmiServerStatus, tuiManager, &TUIManager::hmiServerStatus);
+
     // Inicio
     logFile->println("Cargado");
 }

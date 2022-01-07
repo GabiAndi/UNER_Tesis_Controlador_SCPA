@@ -12,10 +12,9 @@
 
 #include <QObject>
 
-#include <QByteArray>
 #include <QTimer>
 
-#include <QDebug>
+#include "datatypes.h"
 
 class HMIProtocolManager : public QObject
 {
@@ -37,21 +36,6 @@ class HMIProtocolManager : public QObject
         void newCommand(uint8_t &cmd, QByteArray &payload);
 
         // Paquete de datos
-        typedef struct
-        {
-            uint16_t dataMaxLength;
-            uint32_t timeOutMs;
-
-            QByteArray packageReadData;
-
-            uint16_t packageReadIndex;
-            uint8_t packageReadState;
-
-            uint16_t packageReadPayloadLength;
-            uint8_t packageReadCmd;
-            QByteArray packageReadPayload;
-        }hmi_protocol_package_t;
-
         hmi_protocol_package_t *hmi_protocol_package = nullptr;
 
     private slots:

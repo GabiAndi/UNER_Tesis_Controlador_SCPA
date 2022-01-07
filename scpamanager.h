@@ -14,7 +14,6 @@
 #include <QThread>
 
 #include "logfile.h"
-
 #include "tuimanager.h"
 #include "hmiservermanager.h"
 

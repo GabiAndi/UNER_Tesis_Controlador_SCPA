@@ -54,6 +54,15 @@ void TUIManager::init()
     logFile->println("Cargado");
 }
 
+void TUIManager::hmiServerStatus(hmi_server_status_t status)
+{
+    *consoleOutput << "IP servidor: " << status.serverIP << Qt::endl;
+    *consoleOutput << "IP cliente: " << status.clientIP << Qt::endl;
+    *consoleOutput << "Puerto usado: " << status.port << Qt::endl;
+
+    consoleWait();
+}
+
 void TUIManager::consoleReadyLine(const QString line)
 {
     // Comando convertido a minusculas
@@ -73,6 +82,12 @@ void TUIManager::consoleReadyLine(const QString line)
         consoleClear();
         consoleWelcome();
         consoleWait();
+    }
+
+    // Comando para consultar el estado del servidor HMI
+    else if (cmd == "hmi status")
+    {
+        emit getHmiServerStatus();
     }
 
     // Comando no conocido

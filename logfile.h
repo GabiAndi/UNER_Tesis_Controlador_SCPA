@@ -17,7 +17,6 @@
 #include <QFile>
 #include <QDate>
 #include <QTime>
-#include <QDebug>
 
 class LogFile : public QObject
 {

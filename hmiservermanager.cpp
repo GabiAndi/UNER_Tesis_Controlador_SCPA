@@ -50,6 +50,22 @@ void HMIServerManager::init()
     }
 }
 
+void HMIServerManager::getHmiServerStatus()
+{
+    hmi_server_status_t status;
+
+    status.serverIP = hmiServer->serverAddress().toString();
+    status.port = QString::asprintf("%d", hmiServer->serverPort());
+
+    if (clientTcpSocket != nullptr)
+        status.clientIP = clientTcpSocket->localAddress().toString();
+
+    else
+        status.clientIP = "No conectado";
+
+    emit hmiServerStatus(status);
+}
+
 void HMIServerManager::newConnection()
 {
     // Conexión

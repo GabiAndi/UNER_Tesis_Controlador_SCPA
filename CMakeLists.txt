@@ -16,6 +16,7 @@ find_package(Qt6 COMPONENTS Network REQUIRED)
 
 set(PROJECT_SOURCES
     main.cpp
+    datatypes.h
     scpamanager.h scpamanager.cpp
     logfile.h logfile.cpp
     tuimanager.h tuimanager.cpp
