@@ -13,6 +13,7 @@
 #include <QObject>
 
 #include <QThread>
+#include <QTimer>
 
 #include <ncurses.h>
 #undef timeout
@@ -22,6 +23,9 @@
 #include "logfile.h"
 #include "consolelistener.h"
 #include "datatypes.h"
+
+#define WINDOW_PADDING      6
+#define TEXT_CENTER(str)    ((screenGetSize().width() - WINDOW_PADDING - 2 - str.length()) / 2)
 
 class TUIManager : public QObject
 {
@@ -49,44 +53,50 @@ class TUIManager : public QObject
         QThread *consoleThread = nullptr;
         ConsoleListener *consoleListener = nullptr;
 
-        void consoleWelcome();
-        void consoleMenu();
-        void consolePrintKeyboardCode(int key);
+        // Pantalla de consola
+        void refreshScreen();
+        QSize screenGetSize();
 
-        QSize screenGetSize(WINDOW *win = stdscr);
+        void welcomeScreen();
+        void homeScreen();
+        void exitScreen();
+        void testScreen();
 
-        void consoleInitColors();
+        void initColors();
 
-        enum ConsoleColor : short
+        enum Color : short
         {
-            ALERT = 1,
-            WARNING,
-            INFO
+            ALERT_COLORS = 1,
+            WARNING_COLORS,
+            INFO_COLORS
         };
 
-        enum ConsoleCommand : short
+        enum Screen : uint8_t
         {
-            EXIT,
-            HMI_SERVER_INFO
+            NO_IMPLEMENTED_SCREEN,
+            WELLCOME_SCREEN,
+            HOME_SCREEN,
+            EXIT_SCREEN,
+            HMI_INFO_SCREEN,
+            TEST_SCREEN
         };
 
-        typedef struct
+        typedef struct home_screen_option
         {
             QString text;
-            ConsoleCommand id;
-        }tui_menu_command_t;
+            Screen screen = NO_IMPLEMENTED_SCREEN;
+        }home_screen_option_t;
 
-        typedef struct
+        typedef struct state
         {
-            int menuIndex;
-        }tui_state_t;
+            Screen currentScreen;
+            int homeScreenIndex;
+            int lastKey;
+        }state_t;
 
-        tui_state_t *tuiState = nullptr;
+        state_t *tuiState = nullptr;
 
-        QList<tui_menu_command_t> *menuCommands = nullptr;
-
-        // Comandos
-        void executeCommand(const ConsoleCommand id);
+        QList<home_screen_option_t> *homeScreenOptions = nullptr;
 
         // Aplicacion
         void closeApplication();

@@ -25,18 +25,16 @@ set(PROJECT_SOURCES
     hmiprotocolmanager.h hmiprotocolmanager.cpp
 )
 
-# Libreria de ncurses
+# Librerias externas
+# ncurses
 add_library(ncurses SHARED IMPORTED)
 set_property(TARGET ncurses PROPERTY IMPORTED_LOCATION "/lib/x86_64-linux-gnu/libncurses.so")
-
-add_library(menu SHARED IMPORTED)
-set_property(TARGET menu PROPERTY IMPORTED_LOCATION "/lib/x86_64-linux-gnu/libmenu.so")
 
 qt_add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Network)
 
-# Libreria de ncurses
+# Librerias externas
+# ncurses
 target_link_libraries(${PROJECT_NAME} PRIVATE ncurses)
-target_link_libraries(${PROJECT_NAME} PRIVATE menu)

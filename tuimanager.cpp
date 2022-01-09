@@ -16,8 +16,11 @@ TUIManager::~TUIManager()
     delete consoleThread;
 
     // Consola
+    endwin();
+
     delete tuiState;
-    delete menuCommands;
+
+    delete homeScreenOptions;
 
     // Cierre del archivo de log
     logFile->println("Finalizado");
@@ -41,12 +44,13 @@ void TUIManager::init()
     noecho();
     curs_set(0);
 
-    consoleInitColors();
+    initColors();
 
     // Consola
-    tuiState = new tui_state_t;
+    tuiState = new state_t;
 
-    tuiState->menuIndex = 0;
+    tuiState->currentScreen = Screen::WELLCOME_SCREEN;
+    tuiState->homeScreenIndex = 0;
 
     // Iniciamos la captura de la consola
     consoleThread = new QThread(this);
@@ -60,26 +64,92 @@ void TUIManager::init()
 
     consoleThread->start();
 
-    // Pantalla de bienvenida
-    consoleWelcome();
-
     // Comandos
-    menuCommands = new QList<tui_menu_command_t>;
+    homeScreenOptions = new QList<home_screen_option_t>;
 
-    menuCommands->append(tui_menu_command_t {"Ver informacion de HMI server", ConsoleCommand::HMI_SERVER_INFO});
-    menuCommands->append(tui_menu_command_t {"Salir", ConsoleCommand::EXIT});
+    homeScreenOptions->append(home_screen_option_t {
+                                  "HMI info", Screen::HMI_INFO_SCREEN
+                              });
+
+    homeScreenOptions->append(home_screen_option_t {
+                                  "Testeo", Screen::TEST_SCREEN
+                              });
+
+    homeScreenOptions->append(home_screen_option_t {
+                                  "Salir", Screen::EXIT_SCREEN
+                              });
 
     // Mensaje de inicio
     logFile->println("Cargado");
+
+    // Mostramos la pantalla
+    refreshScreen();
 }
 
 void TUIManager::hmiServerStatus(hmi_server_status_t status)
 {
-    /**consoleOutput << "IP servidor: " << status.serverIP << Qt::endl;
-    *consoleOutput << "IP cliente: " << status.clientIP << Qt::endl;
-    *consoleOutput << "Puerto usado: " << status.port << Qt::endl;
+    if (tuiState->currentScreen == Screen::HMI_INFO_SCREEN)
+    {
+        QString title = " Informacion del HMI ";
 
-    consoleWait();*/
+        WINDOW *hmiInfoWindow = newwin(5, screenGetSize().width() - WINDOW_PADDING, 1, 3);
+
+        box(hmiInfoWindow, 0, 0);
+
+        wmove(hmiInfoWindow, 0, TEXT_CENTER(title));
+        wprintw(hmiInfoWindow, title.toStdString().c_str());
+
+        wmove(hmiInfoWindow, 1, 3);
+        wprintw(hmiInfoWindow, "IP del servidor: %s", status.serverIP.toStdString().c_str());
+
+        wmove(hmiInfoWindow, 2, 3);
+        wprintw(hmiInfoWindow, "Puerto de escucha: %s", status.port.toStdString().c_str());
+
+        wmove(hmiInfoWindow, 3, 3);
+        wprintw(hmiInfoWindow, "IP del cliente: %s", status.clientIP.toStdString().c_str());
+
+        wrefresh(hmiInfoWindow);
+
+        delwin(hmiInfoWindow);
+    }
+}
+
+void TUIManager::refreshScreen()
+{
+    // Borramos el contenido de la pantalla principal
+    clear();
+    refresh();
+
+    switch (tuiState->currentScreen)
+    {
+        case TUIManager::Screen::WELLCOME_SCREEN:
+            welcomeScreen();
+
+            break;
+
+        case TUIManager::Screen::HOME_SCREEN:
+            homeScreen();
+
+            break;
+
+        case TUIManager::Screen::HMI_INFO_SCREEN:
+            emit getHmiServerStatus();
+
+            break;
+
+        case TUIManager::Screen::TEST_SCREEN:
+            testScreen();
+
+            break;
+
+        case TUIManager::Screen::EXIT_SCREEN:
+            exitScreen();
+
+            break;
+
+        default:
+            break;
+    }
 }
 
 void TUIManager::consoleNewKey(const int key)
@@ -87,27 +157,70 @@ void TUIManager::consoleNewKey(const int key)
     // Captura de tecla
     switch (key)
     {
+        // F5
+        case 269:
+            // Reservado para la actualización manual de la pantalla
+            break;
+
         // Flecha hacia abajo
         case 258:
-            tuiState->menuIndex++;
+            if (tuiState->currentScreen == Screen::HOME_SCREEN)
+            {
+                tuiState->homeScreenIndex++;
 
-            if (tuiState->menuIndex >= menuCommands->length())
-                tuiState->menuIndex = 0;
+                if (tuiState->homeScreenIndex >= homeScreenOptions->length())
+                    tuiState->homeScreenIndex = 0;
+            }
 
             break;
 
         // Flecha hacia arriba
         case 259:
-            tuiState->menuIndex--;
+            if (tuiState->currentScreen == Screen::HOME_SCREEN)
+            {
+                tuiState->homeScreenIndex--;
 
-            if (tuiState->menuIndex < 0)
-                tuiState->menuIndex = menuCommands->length() - 1;
+                if (tuiState->homeScreenIndex < 0)
+                    tuiState->homeScreenIndex = homeScreenOptions->length() - 1;
+
+                break;
+            }
+
+        // Enter
+        case 10:
+            // Si estamos en el menu principal vamos a la pantalla seleccionada
+            if (tuiState->currentScreen == TUIManager::Screen::HOME_SCREEN)
+            {
+                tuiState->currentScreen = homeScreenOptions->at(tuiState->homeScreenIndex).screen;
+            }
+
+            // Si estamos en el mensaje de bienvenida nos vamos al menu principal
+            else if (tuiState->currentScreen == TUIManager::Screen::WELLCOME_SCREEN)
+            {
+                tuiState->currentScreen = TUIManager::Screen::HOME_SCREEN;
+            }
+
+            // Si estamos la pantalla de salida
+            else if (tuiState->currentScreen == TUIManager::Screen::EXIT_SCREEN)
+            {
+                closeApplication();
+            }
 
             break;
 
-        // Es un enter
-        case 10:
-            executeCommand(menuCommands->at(tuiState->menuIndex).id);
+        // Escape
+        case 27:
+            // Salimos de la pantalla de test si presionamos dos veces escape
+            if ((tuiState->currentScreen == TUIManager::Screen::TEST_SCREEN) &&
+                     (tuiState->lastKey != key))
+            {
+                tuiState->currentScreen = TUIManager::Screen::TEST_SCREEN;
+            }
+
+            else
+            {
+                tuiState->currentScreen = TUIManager::Screen::HOME_SCREEN;
+            }
 
             break;
 
@@ -115,43 +228,18 @@ void TUIManager::consoleNewKey(const int key)
             break;
     }
 
-    /*// Comando para limpiar la pantalla
-    else if (cmd == "clear")
-    {
-        consoleClear();
-        consoleWelcome();
-        consoleWait();
-    }
+    // Actualizamos la tecla anterior
+    tuiState->lastKey = key;
 
-    // Comando para consultar el estado del servidor HMI
-    else if (cmd == "hmi status")
-    {
-        emit getHmiServerStatus();
-    }
-
-    // Comando no conocido
-    else
-    {
-        *consoleOutput << "Comando no valido para: " << line << Qt::endl;
-        consoleWait();
-    }*/
-
-    // Borramos todo
-    clear();
-
-    // Ventana
-    refresh();
-
-    // Ventana de menu
-    consoleMenu();
-
-    // Utilizado para ver el codigo de tecla
-    //consolePrintKeyboardCode(key);
+    // Actualizamos
+    refreshScreen();
 }
 
-void TUIManager::consoleWelcome()
+void TUIManager::welcomeScreen()
 {
     // Mensajes
+    QString buttonText = "-> Continuar <-";
+
     QString titulo = " Sistema de control de planta de aireacion ";
     QString descripcion = "Tesis de grado para recibir el titulo de Ingeniero en Mecatronica.";
     QString autores = "Autores: Gianluca Lovatto y Gabriel Aguirre.";
@@ -162,11 +250,11 @@ void TUIManager::consoleWelcome()
     QString ncursesVersion = QString::asprintf("NCurses: %s", NCURSES_VERSION);
 
     // Dialogo de bienvenida
-    WINDOW *welcomeWindow = newwin(10, screenGetSize().width() - 6, 1, 3);
+    WINDOW *welcomeWindow = newwin(12, screenGetSize().width() - WINDOW_PADDING, 1, 3);
 
     box(welcomeWindow, 0, 0);
 
-    wmove(welcomeWindow, 0, ((screenGetSize().width() - 8 - titulo.length()) / 2));
+    wmove(welcomeWindow, 0, TEXT_CENTER(titulo));
     wprintw(welcomeWindow, titulo.toStdString().c_str());
 
     wmove(welcomeWindow, 1, 3);
@@ -187,8 +275,8 @@ void TUIManager::consoleWelcome()
     wmove(welcomeWindow, 8, 3);
     wprintw(welcomeWindow, ncursesVersion.toStdString().c_str());
 
-    move(12, 0);
-    printw("Precione una tecla para continuar...");
+    wmove(welcomeWindow, 10, TEXT_CENTER(buttonText));
+    wprintw(welcomeWindow, buttonText.toStdString().c_str());
 
     refresh();
     wrefresh(welcomeWindow);
@@ -196,35 +284,43 @@ void TUIManager::consoleWelcome()
     delwin(welcomeWindow);
 }
 
-void TUIManager::consoleMenu()
+void TUIManager::homeScreen()
 {
-    QString menuTitle = " Menu de comandos ";
+    QString title = " Pantalla principal ";
 
-    WINDOW *menuWindow = newwin(10, screenGetSize().width() - 6, 1, 3);
+    WINDOW *menuWindow = newwin(2 + homeScreenOptions->length(), screenGetSize().width() - WINDOW_PADDING, 1, 3);
 
     box(menuWindow, 0, 0);
 
-    wmove(menuWindow, 0, (screenGetSize().width() - menuTitle.length()) / 2);
-    wprintw(menuWindow, menuTitle.toStdString().c_str());
+    wmove(menuWindow, 0, TEXT_CENTER(title));
+    wprintw(menuWindow, title.toStdString().c_str());
 
-    for (int i = 0 ; i < menuCommands->length() ; i++)
+    for (int i = 0 ; i < homeScreenOptions->length() ; i++)
     {
         wmove(menuWindow, i + 1, 5);
 
-        if (menuCommands->at(i).id == ConsoleCommand::EXIT)
+        if (homeScreenOptions->at(i).screen == Screen::EXIT_SCREEN)
         {
-            wattron(menuWindow, COLOR_PAIR(ConsoleColor::ALERT));
-            wprintw(menuWindow, menuCommands->at(i).text.toStdString().c_str());
-            wattroff(menuWindow, COLOR_PAIR(ConsoleColor::ALERT));
+            wattron(menuWindow, COLOR_PAIR(Color::ALERT_COLORS));
+            wprintw(menuWindow, homeScreenOptions->at(i).text.toStdString().c_str());
+            wattroff(menuWindow, COLOR_PAIR(Color::ALERT_COLORS));
+        }
+
+        else if (homeScreenOptions->at(i).screen == Screen::NO_IMPLEMENTED_SCREEN)
+        {
+            wattron(menuWindow, COLOR_PAIR(Color::WARNING_COLORS));
+            wprintw(menuWindow, homeScreenOptions->at(i).text.toStdString().c_str());
+            wattroff(menuWindow, COLOR_PAIR(Color::WARNING_COLORS));
+            wprintw(menuWindow, " (Pantalla no implementada)");
         }
 
         else
         {
-            wprintw(menuWindow, menuCommands->at(i).text.toStdString().c_str());
+            wprintw(menuWindow, homeScreenOptions->at(i).text.toStdString().c_str());
         }
     }
 
-    wmove(menuWindow, tuiState->menuIndex + 1, 2);
+    wmove(menuWindow, tuiState->homeScreenIndex + 1, 2);
     wprintw(menuWindow, "->");
 
     wrefresh(menuWindow);
@@ -232,64 +328,76 @@ void TUIManager::consoleMenu()
     delwin(menuWindow);
 }
 
-void TUIManager::consolePrintKeyboardCode(int key)
+void TUIManager::exitScreen()
 {
-    clear();
-    refresh();
+    QString title = " Salir del programa ";
 
-    QString menuTitle = " Testeo ";
+    QString buttonText = "-> SALIR <-";
 
-    WINDOW *testWindow = newwin(3, screenGetSize().width() - 6, 1, 3);
+    WINDOW *exitWindow = newwin(7, screenGetSize().width() - WINDOW_PADDING, 1, 3);
+
+    box(exitWindow, 0, 0);
+
+    wmove(exitWindow, 0, TEXT_CENTER(title));
+    wprintw(exitWindow, title.toStdString().c_str());
+
+    wmove(exitWindow, 1, 3);
+
+    wattron(exitWindow, COLOR_PAIR(Color::ALERT_COLORS));
+    wprintw(exitWindow, "ALERTA!!!");
+    wattroff(exitWindow, COLOR_PAIR(Color::ALERT_COLORS));
+
+    wprintw(exitWindow, " Esta por salir del programa");
+
+    wmove(exitWindow, 2, 3);
+    wprintw(exitWindow, "Esto causara que el control del proceso se detenga por completo.");
+
+    wmove(exitWindow, 3, 3);
+    wprintw(exitWindow, "Solo haga esto si esta realmente consiente de lo que hace.");
+
+    wmove(exitWindow, 5, TEXT_CENTER(buttonText));
+    wprintw(exitWindow, buttonText.toStdString().c_str());
+
+    wrefresh(exitWindow);
+
+    delwin(exitWindow);
+}
+
+void TUIManager::testScreen()
+{
+    QString title = " Testeo ";
+
+    WINDOW *testWindow = newwin(3, screenGetSize().width() - WINDOW_PADDING, 1, 3);
 
     box(testWindow, 0, 0);
 
-    wmove(testWindow, 0, (screenGetSize().width() - menuTitle.length()) / 2);
-    wprintw(testWindow, menuTitle.toStdString().c_str());
+    wmove(testWindow, 0, TEXT_CENTER(title));
+    wprintw(testWindow, title.toStdString().c_str());
 
     wmove(testWindow, 1, 3);
-
-    wprintw(testWindow, "Codigo de tecla: %d", key);
+    wprintw(testWindow, "Codigo de tecla: %d", tuiState->lastKey);
 
     wrefresh(testWindow);
 
     delwin(testWindow);
 }
 
-QSize TUIManager::screenGetSize(WINDOW *win)
+QSize TUIManager::screenGetSize()
 {
-    return QSize(getmaxx(win), getmaxy(win));
+    return QSize(getmaxx(stdscr), getmaxy(stdscr));
 }
 
-void TUIManager::consoleInitColors()
+void TUIManager::initColors()
 {
     start_color();
 
     // Iniciamos los colores
-    init_pair(ConsoleColor::ALERT, COLOR_YELLOW, COLOR_RED);
-    init_pair(ConsoleColor::WARNING, COLOR_GREEN, COLOR_YELLOW);
-    init_pair(ConsoleColor::INFO, COLOR_YELLOW, COLOR_BLUE);
-}
-
-void TUIManager::executeCommand(const ConsoleCommand id)
-{
-    switch (id)
-    {
-        case TUIManager::ConsoleCommand::EXIT:
-            emit closedApplication();
-
-            break;
-
-        case TUIManager::ConsoleCommand::HMI_SERVER_INFO:
-            break;
-
-        default:
-            break;
-    }
+    init_pair(Color::ALERT_COLORS, COLOR_YELLOW, COLOR_RED);
+    init_pair(Color::WARNING_COLORS, COLOR_BLUE, COLOR_YELLOW);
+    init_pair(Color::INFO_COLORS, COLOR_YELLOW, COLOR_BLUE);
 }
 
 void TUIManager::closeApplication()
 {
-    endwin();
-
     emit closedApplication();
 }
