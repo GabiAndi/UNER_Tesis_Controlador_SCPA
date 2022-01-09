@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14)
 
 project(Controlador_SCPA VERSION 0.0.1 LANGUAGES CXX)
 
@@ -30,7 +30,7 @@ set(PROJECT_SOURCES
 add_library(ncurses SHARED IMPORTED)
 set_property(TARGET ncurses PROPERTY IMPORTED_LOCATION "/lib/x86_64-linux-gnu/libncurses.so")
 
-qt_add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Network)
@@ -38,3 +38,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Network)
 # Librerias externas
 # ncurses
 target_link_libraries(${PROJECT_NAME} PRIVATE ncurses)
+
+qt_finalize_executable(${PROJECT_NAME})
