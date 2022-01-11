@@ -24,6 +24,9 @@ class HMIProtocolManager : public QObject
         explicit HMIProtocolManager(QObject *parent = nullptr);
         ~HMIProtocolManager();
 
+    signals:
+        void userLogin(const QString user, const QString password);
+
     public slots:
         void init();
 

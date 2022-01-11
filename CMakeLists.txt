@@ -24,6 +24,7 @@ set(PROJECT_SOURCES
     hmiservermanager.h hmiservermanager.cpp
     hmiprotocolmanager.h hmiprotocolmanager.cpp
     hmiusersmanager.h hmiusersmanager.cpp
+    hmiclientmanager.h hmiclientmanager.cpp
 )
 
 # Librerias externas

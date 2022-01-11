@@ -20,6 +20,7 @@ void HMIProtocolManager::newCommand(uint8_t &cmd, QByteArray &payload)
     // Se analiza el comando recibido
     switch (cmd)
     {
+        // Alive
         case 0xA0:
             if (payload.length() != 1)
                 break;
@@ -27,10 +28,30 @@ void HMIProtocolManager::newCommand(uint8_t &cmd, QByteArray &payload)
             if ((uint8_t)(payload.at(0)) != (uint8_t)(0xFF))
                 break;
 
-            // Codigo
             break;
 
-        default:
+        // Login
+        case 0xA1:
+            uint8_t userLength = (uint8_t)(payload.at(0));
+
+            QByteArray user;
+
+            for (uint8_t i = 1 ; i < userLength ; i++)
+            {
+                user.append(payload.at(i));
+            }
+
+            uint8_t passwordLength = (uint8_t)(payload.at(1 + userLength));
+
+            QByteArray password;
+
+            for (uint8_t i = 1 + userLength + 1 ; i < passwordLength ; i++)
+            {
+                password.append(payload.at(i));
+            }
+
+            emit userLogin(QString(user), QString(password));
+
             break;
     }
 }

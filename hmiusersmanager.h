@@ -26,20 +26,19 @@ class HMIUsersManager : public QObject
         explicit HMIUsersManager(QObject *parent = nullptr);
         ~HMIUsersManager();
 
-        QJsonArray readUsers();
-        bool addUser(const QString &user, const QString &password);
-        bool removeUser(const QString &user, const QString &password);
-        bool renameUser(const QString &user, const QString &password,
+        static bool addUser(const QString &user, const QString &password);
+        static bool removeUser(const QString &user, const QString &password);
+        static bool renameUser(const QString &user, const QString &password,
                         const QString &newUser, const QString &newPassword);
-        uint8_t getNumberUsers();
-        bool loginUser(const QString &user, const QString &password);
-        void writeUsers(const QJsonArray &users);
+        static uint8_t getNumberUsers();
+        static bool loginUser(const QString &user, const QString &password);
 
     private:
-        // Usuarios
-        const QString usersSubdir = "users";
+        static QJsonArray readUsers();
+        static void writeUsers(const QJsonArray &users);
 
-        QJsonArray userArray;  // Usuarios
+        // Usuarios
+        inline static const QString usersSubdir = "users";
 };
 
 #endif // HMIUSERSMANAGER_H

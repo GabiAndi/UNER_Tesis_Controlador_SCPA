@@ -3,11 +3,7 @@
 HMIUsersManager::HMIUsersManager(QObject *parent)
     : QObject{parent}
 {
-    // Se crea la carpeta en donde ira el archivo
-    if (!QDir(usersSubdir).exists())
-    {
-        QDir().mkdir(usersSubdir);
-    }
+
 }
 
 HMIUsersManager::~HMIUsersManager()
@@ -17,7 +13,7 @@ HMIUsersManager::~HMIUsersManager()
 
 uint8_t HMIUsersManager::getNumberUsers()
 {
-    return userArray.size();
+    return readUsers().size();
 }
 
 bool HMIUsersManager::loginUser(const QString &user, const QString &password)
@@ -27,35 +23,23 @@ bool HMIUsersManager::loginUser(const QString &user, const QString &password)
     userLogin.insert("user", QJsonValue(user));
     userLogin.insert("password", QJsonValue(password));
 
-    return userArray.contains(userLogin);
-}
-
-QJsonArray HMIUsersManager::readUsers()
-{
-    // Se abre el archivo para leer los usuarios
-    QFile usersFile(usersSubdir + "/users.log");
-
-    usersFile.open(QIODevice::OpenModeFlag::ReadOnly);
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(usersFile.readAll());
-
-    usersFile.close();
-
-    return jsonDocument.array();
+    return readUsers().contains(userLogin);
 }
 
 bool HMIUsersManager::addUser(const QString &user, const QString &password)
 {
+    QJsonArray users = readUsers();
+
     QJsonObject newUser;
 
     newUser.insert("user", QJsonValue(user));
     newUser.insert("password", QJsonValue(password));
 
-    if (!userArray.contains(newUser))
+    if (!users.contains(newUser))
     {
-        userArray.append(newUser);
+        users.append(newUser);
 
-        writeUsers(userArray);
+        writeUsers(users);
 
         return true;
     }
@@ -65,20 +49,22 @@ bool HMIUsersManager::addUser(const QString &user, const QString &password)
 
 bool HMIUsersManager::removeUser(const QString &user, const QString &password)
 {
+    QJsonArray users = readUsers();
+
     QJsonObject userToRemove;
 
     userToRemove.insert("user", QJsonValue(user));
     userToRemove.insert("password", QJsonValue(password));
 
-    if (userArray.contains(userToRemove))
+    if (users.contains(userToRemove))
     {
         for (int i = 0 ; i < getNumberUsers() ; i++)
         {
-            if (userArray.at(i) == userToRemove)
+            if (users.at(i) == userToRemove)
             {
-                userArray.removeAt(i);
+                users.removeAt(i);
 
-                writeUsers(userArray);
+                writeUsers(users);
 
                 return true;
             }
@@ -91,18 +77,20 @@ bool HMIUsersManager::removeUser(const QString &user, const QString &password)
 bool HMIUsersManager::renameUser(const QString &user, const QString &password,
                                  const QString &newUser, const QString &newPassword)
 {
+    QJsonArray users = readUsers();
+
     QJsonObject userToRename;
 
     userToRename.insert("user", QJsonValue(user));
     userToRename.insert("password", QJsonValue(password));
 
-    if (userArray.contains(userToRename))
+    if (users.contains(userToRename))
     {
         for (int i = 0 ; i < getNumberUsers() ; i++)
         {
-            if (userArray.at(i) == userToRename)
+            if (users.at(i) == userToRename)
             {
-                userArray.removeAt(i);
+                users.removeAt(i);
 
                 addUser(newUser, newPassword);
 
@@ -114,8 +102,34 @@ bool HMIUsersManager::renameUser(const QString &user, const QString &password,
     return false;
 }
 
+QJsonArray HMIUsersManager::readUsers()
+{
+    // Se crea la carpeta en donde ira el archivo
+    if (!QDir(usersSubdir).exists())
+    {
+        QDir().mkdir(usersSubdir);
+    }
+
+    // Se abre el archivo para leer los usuarios
+    QFile usersFile(usersSubdir + "/users.log");
+
+    usersFile.open(QIODevice::OpenModeFlag::ReadOnly);
+
+    QJsonDocument jsonDocument = QJsonDocument::fromJson(usersFile.readAll());
+
+    usersFile.close();
+
+    return jsonDocument.array();
+}
+
 void HMIUsersManager::writeUsers(const QJsonArray &users)
 {
+    // Se crea la carpeta en donde ira el archivo
+    if (!QDir(usersSubdir).exists())
+    {
+        QDir().mkdir(usersSubdir);
+    }
+
     // Se abre el archivo para leer los usuarios
     QFile usersFile(usersSubdir + "/users.log");
 
