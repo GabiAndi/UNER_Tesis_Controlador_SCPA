@@ -9,8 +9,11 @@ HMIServerManager::HMIServerManager(QObject *parent)
 HMIServerManager::~HMIServerManager()
 {
     // Se finaliza el hilo del analisis de paquete
-    clientProtocolThread->quit();
-    clientProtocolThread->wait();
+    if ((clientProtocolThread != nullptr) && (clientProtocolManager != nullptr))
+    {
+        clientProtocolThread->quit();
+        clientProtocolThread->wait();
+    }
 
     delete clientProtocolManager;
     delete clientProtocolThread;
@@ -18,6 +21,8 @@ HMIServerManager::~HMIServerManager()
     // Se libera la memoria
     delete clientTcpSocket;
     delete hmiServer;
+
+    delete hmiUsersManager;
 
     // Cierre del archivo de log
     logFile->println("Finalizado");
@@ -48,6 +53,13 @@ void HMIServerManager::init()
     {
         logFile->println("No se pudo cargar");
     }
+
+    // Cargando usuarios
+    logFile->println("Cargando usuarios");
+
+    hmiUsersManager = new HMIUsersManager(this);
+
+    logFile->println(QString::asprintf("%d usuarios cargados", hmiUsersManager->getNumberUsers()));
 }
 
 void HMIServerManager::getHmiServerStatus()

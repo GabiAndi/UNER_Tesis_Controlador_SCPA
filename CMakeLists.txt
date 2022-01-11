@@ -23,6 +23,7 @@ set(PROJECT_SOURCES
     consolelistener.h consolelistener.cpp
     hmiservermanager.h hmiservermanager.cpp
     hmiprotocolmanager.h hmiprotocolmanager.cpp
+    hmiusersmanager.h hmiusersmanager.cpp
 )
 
 # Librerias externas

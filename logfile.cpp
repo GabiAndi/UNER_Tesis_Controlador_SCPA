@@ -11,14 +11,8 @@ LogFile::LogFile(QObject *parent)
 
     file.setFileName(logSubdir + "/" + parent->objectName() + ".log");
 
-    // Si el archivo existe se elimina
-    if (file.exists())
-    {
-        file.remove();
-    }
-
     // Se abre el archivo para añadir contenido al final
-    file.open(QIODevice::OpenModeFlag::ReadWrite | QIODevice::OpenModeFlag::Append);
+    file.open(QIODevice::OpenModeFlag::ReadWrite | QIODevice::OpenModeFlag::Truncate);
 }
 
 LogFile::~LogFile()

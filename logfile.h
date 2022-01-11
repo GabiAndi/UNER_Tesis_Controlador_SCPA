@@ -26,8 +26,6 @@ class LogFile : public QObject
         explicit LogFile(QObject *parent = nullptr);
         ~LogFile();
 
-        bool create(const QString &fileName);
-
         QString getTimeLog();
 
         bool print(const QString &logData);

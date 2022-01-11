@@ -24,6 +24,7 @@
 #include "logfile.h"
 #include "hmiprotocolmanager.h"
 #include "datatypes.h"
+#include "hmiusersmanager.h"
 
 #define HMI_SERVER_PORT           33600
 
@@ -56,6 +57,9 @@ class HMIServerManager : public QObject
 
         QThread *clientProtocolThread = nullptr;
         HMIProtocolManager *clientProtocolManager = nullptr;
+
+        // Usuarios
+        HMIUsersManager *hmiUsersManager = nullptr;
 
     private slots:
         // Conexiones
