@@ -15,7 +15,6 @@
 #include <QThread>
 
 #include "hmiprotocolmanager.h"
-#include "datatypes.h"
 #include "hmiusersmanager.h"
 
 class HMIClientManager : public QObject
@@ -29,7 +28,7 @@ class HMIClientManager : public QObject
         QHostAddress getAddress();
 
     signals:
-        void readProtocol(const QByteArray data);
+        void readData(const QByteArray data);
 
         void clientDisconnected(HMIClientManager *client);
 
@@ -44,11 +43,6 @@ class HMIClientManager : public QObject
         HMIProtocolManager *protocolManager = nullptr;
 
     private slots:
-        // Eventos
-        void readData();
-
-        void tcpSocketDisconnected();
-
         // Comandos
         void userLogin(const QString user, const QString password);
 };

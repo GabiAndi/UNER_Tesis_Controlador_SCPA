@@ -27,6 +27,9 @@ set(PROJECT_SOURCES
     hmiclientmanager.h hmiclientmanager.cpp
 )
 
+# Libreria de protocolo de comunicacíon
+add_subdirectory("../HMIProtocol" "../build-HMIProtocol")
+
 # Librerias externas
 # ncurses
 add_library(ncurses SHARED IMPORTED)
@@ -36,6 +39,9 @@ qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Network)
+
+# Libreria de protocolo de comunicacíon
+target_link_libraries(${PROJECT_NAME} PRIVATE HMIProtocol)
 
 # Librerias externas
 # ncurses

@@ -24,7 +24,7 @@
 #include "datatypes.h"
 #include "hmiclientmanager.h"
 
-#define HMI_SERVER_PORT           33600
+#define HMI_SERVER_PORT         33600
 
 class HMIServerManager : public QObject
 {
@@ -35,19 +35,19 @@ class HMIServerManager : public QObject
         ~HMIServerManager();
 
     signals:
-        void hmiServerStatus(hmi_server_status_t status);
+        //void hmiServerStatus(hmi_server_status_t status);
 
     public slots:
         void init();
 
-        void getHmiServerStatus();
+        //void getHmiServerStatus();
 
     private:
         // Archivo de logs
         LogFile *logFile = nullptr;
 
         // Conexiones
-        QTcpServer *hmiServer = nullptr;    // Servidor HMI
+        QTcpServer *hmiServer = nullptr;
 
     private slots:
         // Conexiones entrantes

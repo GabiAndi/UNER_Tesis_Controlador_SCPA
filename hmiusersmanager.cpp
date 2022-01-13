@@ -16,6 +16,25 @@ uint8_t HMIUsersManager::getNumberUsers()
     return readUsers().size();
 }
 
+QList<QStringList> HMIUsersManager::listUsers()
+{
+    QList<QStringList> users;
+
+    QJsonArray jsonUsers = readUsers();
+
+    for (int i = 0 ; i < getNumberUsers() ; i++)
+    {
+        QStringList user;
+
+        user.append(jsonUsers.at(i)["user"].toString());
+        user.append(jsonUsers.at(i)["password"].toString());
+
+        users.append(user);
+    }
+
+    return users;
+}
+
 bool HMIUsersManager::loginUser(const QString &user, const QString &password)
 {
     QJsonObject userLogin;
@@ -113,7 +132,12 @@ QJsonArray HMIUsersManager::readUsers()
     // Se abre el archivo para leer los usuarios
     QFile usersFile(usersSubdir + "/users.log");
 
-    usersFile.open(QIODevice::OpenModeFlag::ReadOnly);
+    // Si el archivo no existe se crea
+    if (!usersFile.exists())
+        usersFile.open(QIODevice::OpenModeFlag::ReadOnly | QIODevice::OpenModeFlag::NewOnly);
+
+    else
+        usersFile.open(QIODevice::OpenModeFlag::ReadOnly);
 
     QJsonDocument jsonDocument = QJsonDocument::fromJson(usersFile.readAll());
 
@@ -133,7 +157,12 @@ void HMIUsersManager::writeUsers(const QJsonArray &users)
     // Se abre el archivo para leer los usuarios
     QFile usersFile(usersSubdir + "/users.log");
 
-    usersFile.open(QIODevice::OpenModeFlag::WriteOnly | QIODevice::OpenModeFlag::Truncate);
+    // Si el archivo no existe se crea
+    if (!usersFile.exists())
+        usersFile.open(QIODevice::OpenModeFlag::WriteOnly | QIODevice::OpenModeFlag::NewOnly);
+
+    else
+        usersFile.open(QIODevice::OpenModeFlag::WriteOnly);
 
     QJsonDocument jsonDocument(users);
 

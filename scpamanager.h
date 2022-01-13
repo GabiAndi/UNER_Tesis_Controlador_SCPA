@@ -25,8 +25,6 @@ class SCPAManager : public QObject
         explicit SCPAManager(QObject *parent = nullptr);
         ~SCPAManager();
 
-        void init();
-
     private:
         // Archivo de logs
         LogFile *logFile = nullptr;

@@ -15,6 +15,7 @@
 #include <QTimer>
 
 #include "datatypes.h"
+#include "hmiprotocol.h"
 
 class HMIProtocolManager : public QObject
 {
@@ -25,24 +26,26 @@ class HMIProtocolManager : public QObject
         ~HMIProtocolManager();
 
     signals:
+        void readyWrite(const QByteArray package);
+
         void userLogin(const QString user, const QString password);
 
     public slots:
         void init();
 
-        void readProtocol(const QByteArray data);
+        void readData(const QByteArray package);
 
     private:
-        // Timer del paquete de datos
-        QTimer *timeOutTimer = nullptr;
+        enum Command : uint8_t
+        {
+            ALIVE = 0xA0,
+            LOGIN = 0xA1
+        };
 
-        void newCommand(uint8_t &cmd, QByteArray &payload);
-
-        // Paquete de datos
-        hmi_protocol_package_t *hmi_protocol_package = nullptr;
+        HMIProtocol *hmiProtocol = nullptr;
 
     private slots:
-        void readReset();
+        void newPackage(const uint8_t cmd, const QByteArray payload);
 };
 
 #endif // HMIPROTOCOLMANAGER_H

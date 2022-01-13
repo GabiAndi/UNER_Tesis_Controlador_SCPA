@@ -13,6 +13,7 @@
 
 #include <QFile>
 #include <QDir>
+#include <QMap>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -31,6 +32,7 @@ class HMIUsersManager : public QObject
         static bool renameUser(const QString &user, const QString &password,
                         const QString &newUser, const QString &newPassword);
         static uint8_t getNumberUsers();
+        static QList<QStringList> listUsers();
         static bool loginUser(const QString &user, const QString &password);
 
     private:

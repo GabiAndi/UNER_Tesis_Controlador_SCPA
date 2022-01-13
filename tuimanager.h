@@ -23,6 +23,7 @@
 #include "logfile.h"
 #include "consolelistener.h"
 #include "datatypes.h"
+#include "hmiusersmanager.h"
 
 #define WINDOW_PADDING      6
 #define TEXT_CENTER(str)    ((screenGetSize().width() - WINDOW_PADDING - 2 - str.length()) / 2)
@@ -61,6 +62,7 @@ class TUIManager : public QObject
         void homeScreen();
         void exitScreen();
         void testScreen();
+        void usersScreen();
 
         void initColors();
 
@@ -78,7 +80,8 @@ class TUIManager : public QObject
             HOME_SCREEN,
             EXIT_SCREEN,
             HMI_INFO_SCREEN,
-            TEST_SCREEN
+            TEST_SCREEN,
+            USERS_SCREEN
         };
 
         typedef struct home_screen_option

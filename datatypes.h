@@ -15,21 +15,6 @@
 
 typedef struct
 {
-    uint16_t dataMaxLength;
-    uint32_t timeOutMs;
-
-    QByteArray packageReadData;
-
-    uint16_t packageReadIndex;
-    uint8_t packageReadState;
-
-    uint16_t packageReadPayloadLength;
-    uint8_t packageReadCmd;
-    QByteArray packageReadPayload;
-}hmi_protocol_package_t;
-
-typedef struct
-{
     QString serverIP;
     QString clientIP;
     QString port;

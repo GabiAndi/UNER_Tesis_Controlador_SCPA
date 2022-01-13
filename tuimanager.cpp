@@ -72,6 +72,10 @@ void TUIManager::init()
                               });
 
     homeScreenOptions->append(home_screen_option_t {
+                                  "Usuarios", Screen::USERS_SCREEN
+                              });
+
+    homeScreenOptions->append(home_screen_option_t {
                                   "Testeo", Screen::TEST_SCREEN
                               });
 
@@ -134,6 +138,11 @@ void TUIManager::refreshScreen()
 
         case TUIManager::Screen::HMI_INFO_SCREEN:
             emit getHmiServerStatus();
+
+            break;
+
+        case TUIManager::Screen::USERS_SCREEN:
+            usersScreen();
 
             break;
 
@@ -380,6 +389,33 @@ void TUIManager::testScreen()
     wrefresh(testWindow);
 
     delwin(testWindow);
+}
+
+void TUIManager::usersScreen()
+{
+    QList listUsers = HMIUsersManager::listUsers();
+
+    QString title = " Usuarios ";
+
+    WINDOW *usersWindow = newwin(2 + listUsers.length(), screenGetSize().width() - WINDOW_PADDING, 1, 3);
+
+    box(usersWindow, 0, 0);
+
+    wmove(usersWindow, 0, TEXT_CENTER(title));
+    wprintw(usersWindow, title.toStdString().c_str());
+
+    for (int i = 0 ; i < listUsers.length() ; i++)
+    {
+        wmove(usersWindow, i + 1, 3);
+        wprintw(usersWindow,
+                "Usuario: %s -- Contrasena: %s",
+                listUsers.at(i).at(0).toStdString().c_str(),
+                listUsers.at(i).at(1).toStdString().c_str());
+    }
+
+    wrefresh(usersWindow);
+
+    delwin(usersWindow);
 }
 
 QSize TUIManager::screenGetSize()

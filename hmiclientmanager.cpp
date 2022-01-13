@@ -4,8 +4,16 @@ HMIClientManager::HMIClientManager(QTcpSocket *tcpSocket, QObject *parent)
     : QObject{parent}, tcpSocket{tcpSocket}
 {
     // Eventos
-    connect(tcpSocket, &QTcpSocket::readyRead, this, &HMIClientManager::readData);
-    connect(tcpSocket, &QTcpSocket::disconnected, this, &HMIClientManager::tcpSocketDisconnected);
+    connect(tcpSocket, &QTcpSocket::readyRead, this, [this]()
+    {
+        QByteArray data = this->tcpSocket->readAll();
+
+        emit readData(data);
+    });
+    connect(tcpSocket, &QTcpSocket::disconnected, this, [this]()
+    {
+        emit clientDisconnected(this);
+    });
 
     // Protocolo
     protocolThread = new QThread(this);
@@ -15,7 +23,14 @@ HMIClientManager::HMIClientManager(QTcpSocket *tcpSocket, QObject *parent)
 
     connect(protocolThread, &QThread::started, protocolManager, &HMIProtocolManager::init);
 
-    connect(this, &HMIClientManager::readProtocol, protocolManager, &HMIProtocolManager::readProtocol);
+    connect(protocolManager, &HMIProtocolManager::readyWrite, this, [this](const QByteArray package)
+    {
+        this->tcpSocket->write(package);
+    });
+
+    connect(this, &HMIClientManager::readData, protocolManager, &HMIProtocolManager::readData);
+
+    connect(protocolManager, &HMIProtocolManager::userLogin, this, &HMIClientManager::userLogin);
 
     protocolThread->start();
 }
@@ -37,27 +52,17 @@ QHostAddress HMIClientManager::getAddress()
     return tcpSocket->localAddress();
 }
 
-void HMIClientManager::readData()
-{
-    emit readProtocol(tcpSocket->readAll());
-}
-
-void HMIClientManager::tcpSocketDisconnected()
-{
-    emit clientDisconnected(this);
-}
-
 void HMIClientManager::userLogin(const QString user, const QString password)
 {
     // Se pudo loguear este cliente
     if (HMIUsersManager::loginUser(user, password))
     {
-        return;
+        //emit userConnected(this);
     }
 
     // No se pudo loguear este cliente
     else
     {
-        return;
+
     }
 }
