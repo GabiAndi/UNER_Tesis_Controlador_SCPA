@@ -3,66 +3,58 @@
 HMIClientManager::HMIClientManager(QTcpSocket *tcpSocket, QObject *parent)
     : QObject{parent}, tcpSocket{tcpSocket}
 {
-    // Eventos
-    connect(tcpSocket, &QTcpSocket::readyRead, this, [this]()
-    {
-        QByteArray data = this->tcpSocket->readAll();
+    // Conexion
+    tcpSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
-        emit readData(data);
-    });
     connect(tcpSocket, &QTcpSocket::disconnected, this, [this]()
     {
         emit clientDisconnected(this);
     });
 
     // Protocolo
-    protocolThread = new QThread(this);
-    protocolManager = new HMIProtocolManager();
+    protocolManager = new HMIProtocolManager(this);
 
-    protocolManager->moveToThread(protocolThread);
-
-    connect(protocolThread, &QThread::started, protocolManager, &HMIProtocolManager::init);
+    connect(tcpSocket, &QTcpSocket::readyRead, this, [this]()
+    {
+        protocolManager->readData(this->tcpSocket->readAll());
+    });
 
     connect(protocolManager, &HMIProtocolManager::readyWrite, this, [this](const QByteArray package)
     {
         this->tcpSocket->write(package);
     });
 
-    connect(this, &HMIClientManager::readData, protocolManager, &HMIProtocolManager::readData);
+    // Timer de conexion
+    timerTimeOut = new QTimer(this);
 
-    connect(protocolManager, &HMIProtocolManager::userLogin, this, &HMIClientManager::userLogin);
+    timerTimeOut->setSingleShot(true);
 
-    protocolThread->start();
+    connect(timerTimeOut, &QTimer::timeout, this, [this]()
+    {
+        emit clientTimeOut(this);
+
+        clientDisconnect();
+    });
+
+    timerTimeOut->start(CLIENT_LOGIN_TIMEOUT);
 }
 
 HMIClientManager::~HMIClientManager()
 {
     // Protocolo
-    protocolThread->quit();
-    protocolThread->wait();
-
     delete protocolManager;
-    delete protocolThread;
 
     delete tcpSocket;
+
+    delete timerTimeOut;
+}
+
+void HMIClientManager::clientDisconnect()
+{
+    tcpSocket->disconnectFromHost();
 }
 
 QHostAddress HMIClientManager::getAddress()
 {
     return tcpSocket->localAddress();
-}
-
-void HMIClientManager::userLogin(const QString user, const QString password)
-{
-    // Se pudo loguear este cliente
-    if (HMIUsersManager::loginUser(user, password))
-    {
-        //emit userConnected(this);
-    }
-
-    // No se pudo loguear este cliente
-    else
-    {
-
-    }
 }

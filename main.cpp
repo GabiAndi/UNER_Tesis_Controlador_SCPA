@@ -20,6 +20,9 @@ int main(int argc, char *argv[])
 
     scpaManager->setObjectName("SCPAManager");
 
+    scpaManager->init();
+
+    // Si el objeto controlador de la aplicacion se destruye, el programa se cierra
     QObject::connect(scpaManager, &SCPAManager::destroyed, &a, &QCoreApplication::quit);
 
     // Bucle de eventos

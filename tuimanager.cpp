@@ -68,10 +68,6 @@ void TUIManager::init()
     homeScreenOptions = new QList<home_screen_option_t>;
 
     homeScreenOptions->append(home_screen_option_t {
-                                  "HMI info", Screen::HMI_INFO_SCREEN
-                              });
-
-    homeScreenOptions->append(home_screen_option_t {
                                   "Usuarios", Screen::USERS_SCREEN
                               });
 
@@ -90,34 +86,6 @@ void TUIManager::init()
     refreshScreen();
 }
 
-void TUIManager::hmiServerStatus(hmi_server_status_t status)
-{
-    if (tuiState->currentScreen == Screen::HMI_INFO_SCREEN)
-    {
-        QString title = " Informacion del HMI ";
-
-        WINDOW *hmiInfoWindow = newwin(5, screenGetSize().width() - WINDOW_PADDING, 1, 3);
-
-        box(hmiInfoWindow, 0, 0);
-
-        wmove(hmiInfoWindow, 0, TEXT_CENTER(title));
-        wprintw(hmiInfoWindow, title.toStdString().c_str());
-
-        wmove(hmiInfoWindow, 1, 3);
-        wprintw(hmiInfoWindow, "IP del servidor: %s", status.serverIP.toStdString().c_str());
-
-        wmove(hmiInfoWindow, 2, 3);
-        wprintw(hmiInfoWindow, "Puerto de escucha: %s", status.port.toStdString().c_str());
-
-        wmove(hmiInfoWindow, 3, 3);
-        wprintw(hmiInfoWindow, "IP del cliente: %s", status.clientIP.toStdString().c_str());
-
-        wrefresh(hmiInfoWindow);
-
-        delwin(hmiInfoWindow);
-    }
-}
-
 void TUIManager::refreshScreen()
 {
     // Borramos el contenido de la pantalla principal
@@ -133,11 +101,6 @@ void TUIManager::refreshScreen()
 
         case TUIManager::Screen::HOME_SCREEN:
             homeScreen();
-
-            break;
-
-        case TUIManager::Screen::HMI_INFO_SCREEN:
-            emit getHmiServerStatus();
 
             break;
 

@@ -12,10 +12,12 @@
 #include <QObject>
 
 #include <QTcpSocket>
-#include <QThread>
+#include <QTimer>
 
 #include "hmiprotocolmanager.h"
 #include "hmiusersmanager.h"
+
+#define CLIENT_LOGIN_TIMEOUT        1000
 
 class HMIClientManager : public QObject
 {
@@ -28,23 +30,21 @@ class HMIClientManager : public QObject
         QHostAddress getAddress();
 
     signals:
-        void readData(const QByteArray data);
-
         void clientDisconnected(HMIClientManager *client);
+        void clientTimeOut(HMIClientManager *client);
 
-        void userConnected(HMIClientManager *client);
+    public slots:
+        void clientDisconnect();
 
     private:
         // Conexion
         QTcpSocket *tcpSocket = nullptr;
 
         // Protocolo
-        QThread *protocolThread = nullptr;
         HMIProtocolManager *protocolManager = nullptr;
 
-    private slots:
-        // Comandos
-        void userLogin(const QString user, const QString password);
+        // Timer de desconexion
+        QTimer *timerTimeOut = nullptr;
 };
 
 #endif // HMICLIENTMANAGER_H

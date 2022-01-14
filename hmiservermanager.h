@@ -21,7 +21,6 @@
 #include <QTcpSocket>
 
 #include "logfile.h"
-#include "datatypes.h"
 #include "hmiclientmanager.h"
 
 #define HMI_SERVER_PORT         33600
@@ -34,13 +33,8 @@ class HMIServerManager : public QObject
         explicit HMIServerManager(QObject *parent = nullptr);
         ~HMIServerManager();
 
-    signals:
-        //void hmiServerStatus(hmi_server_status_t status);
-
     public slots:
         void init();
-
-        //void getHmiServerStatus();
 
     private:
         // Archivo de logs
@@ -53,11 +47,8 @@ class HMIServerManager : public QObject
         // Conexiones entrantes
         void clientConnection();
         void clientConnectionError(const QAbstractSocket::SocketError socketError);
+        void clientTimeOut(HMIClientManager *client);
         void clientDisconnection(HMIClientManager *client);
-
-        // Conexiones autenticadas
-        void userConnection(HMIClientManager *client);
-        void userDisconnection(HMIClientManager *client);
 };
 
 #endif // HMISERVERMANAGER_H

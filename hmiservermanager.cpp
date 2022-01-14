@@ -31,7 +31,9 @@ void HMIServerManager::init()
     connect(hmiServer, &QTcpServer::newConnection, this, &HMIServerManager::clientConnection);
     connect(hmiServer, &QTcpServer::acceptError, this, &HMIServerManager::clientConnectionError);
 
-    if (hmiServer->listen(QHostAddress::AnyIPv4, HMI_SERVER_PORT))
+    // Detecta si se pudo abrir el servidor
+    // Para un futuro es bueno implementar un control de esto
+    if (hmiServer->listen(QHostAddress::SpecialAddress::AnyIPv4, HMI_SERVER_PORT))
     {
         logFile->println("Cargado");
     }
@@ -42,22 +44,6 @@ void HMIServerManager::init()
     }
 }
 
-/*void HMIServerManager::getHmiServerStatus()
-{
-    hmi_server_status_t status;
-
-    status.serverIP = hmiServer->serverAddress().toString();
-    status.port = QString::asprintf("%d", hmiServer->serverPort());
-
-    if (clientTcpSocket != nullptr)
-        status.clientIP = clientTcpSocket->localAddress().toString();
-
-    else
-        status.clientIP = "No conectado";
-
-    emit hmiServerStatus(status);
-}*/
-
 void HMIServerManager::clientConnection()
 {
     // Nuevo cliente
@@ -65,11 +51,10 @@ void HMIServerManager::clientConnection()
 
     HMIClientManager *newClient = new HMIClientManager(newTcpSocket, this);
 
+    connect(newClient, &HMIClientManager::clientTimeOut, this, &HMIServerManager::clientTimeOut);
     connect(newClient, &HMIClientManager::clientDisconnected, this, &HMIServerManager::clientDisconnection);
 
-    connect(newClient, &HMIClientManager::userConnected, this, &HMIServerManager::userConnection);
-
-    logFile->println("Nuevo cliente conectado desde " + newTcpSocket->localAddress().toString());
+    logFile->println("Cliente conectado desde " + newTcpSocket->localAddress().toString());
 }
 
 void HMIServerManager::clientConnectionError(const QAbstractSocket::SocketError socketError)
@@ -77,21 +62,14 @@ void HMIServerManager::clientConnectionError(const QAbstractSocket::SocketError 
     logFile->println(QString::asprintf("Error de conexion: %d", socketError));
 }
 
+void HMIServerManager::clientTimeOut(HMIClientManager *client)
+{
+    logFile->println("Cliente no auntenticado desde " + client->getAddress().toString());
+}
+
 void HMIServerManager::clientDisconnection(HMIClientManager *client)
 {
-    logFile->println("No se autentico el cliente " + client->getAddress().toString());
+    logFile->println("Cliente desconectado desde " + client->getAddress().toString());
 
-    client->deleteLater();
-}
-
-void HMIServerManager::userConnection(HMIClientManager *client)
-{
-    disconnect(client, &HMIClientManager::clientDisconnected, this, &HMIServerManager::clientDisconnection);
-
-    connect(client, &HMIClientManager::clientDisconnected, this, &HMIServerManager::userDisconnection);
-}
-
-void HMIServerManager::userDisconnection(HMIClientManager *client)
-{
     client->deleteLater();
 }

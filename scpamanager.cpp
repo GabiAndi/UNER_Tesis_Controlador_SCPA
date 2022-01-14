@@ -2,6 +2,35 @@
 
 SCPAManager::SCPAManager(QObject *parent) : QObject(parent)
 {
+
+}
+
+SCPAManager::~SCPAManager()
+{
+    // Cierre de hilos
+    // TUI
+    tuiThread->quit();
+    tuiThread->wait();
+
+    delete tuiManager;
+    delete tuiThread;
+
+    // HMI Server
+    hmiServerThread->quit();
+    hmiServerThread->wait();
+
+    delete hmiServerManager;
+    delete hmiServerThread;
+
+    // Cierre del archivo de log
+    logFile->println("Finalizado");
+
+    // Se borran los recursos utilizados
+    delete logFile;
+}
+
+void SCPAManager::init()
+{
     // Archivo de log
     logFile = new LogFile(this);
 
@@ -34,34 +63,6 @@ SCPAManager::SCPAManager(QObject *parent) : QObject(parent)
 
     hmiServerThread->start();
 
-    // Interconexiones
-    //connect(tuiManager, &TUIManager::getHmiServerStatus, hmiServerManager, &HMIServerManager::getHmiServerStatus);
-    //connect(hmiServerManager, &HMIServerManager::hmiServerStatus, tuiManager, &TUIManager::hmiServerStatus);
-
     // Inicio
     logFile->println("Cargado");
-}
-
-SCPAManager::~SCPAManager()
-{
-    // Cierre de hilos
-    // TUI
-    tuiThread->quit();
-    tuiThread->wait();
-
-    delete tuiManager;
-    delete tuiThread;
-
-    // HMI Server
-    hmiServerThread->quit();
-    hmiServerThread->wait();
-
-    delete hmiServerManager;
-    delete hmiServerThread;
-
-    // Cierre del archivo de log
-    logFile->println("Finalizado");
-
-    // Se borran los recursos utilizados
-    delete logFile;
 }

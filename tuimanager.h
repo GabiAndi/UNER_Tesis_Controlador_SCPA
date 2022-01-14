@@ -14,6 +14,7 @@
 
 #include <QThread>
 #include <QTimer>
+#include <QSize>
 
 #include <ncurses.h>
 #undef timeout
@@ -22,7 +23,6 @@
 
 #include "logfile.h"
 #include "consolelistener.h"
-#include "datatypes.h"
 #include "hmiusersmanager.h"
 
 #define WINDOW_PADDING      6
@@ -39,12 +39,8 @@ class TUIManager : public QObject
     signals:
         void closedApplication();
 
-        void getHmiServerStatus();
-
     public slots:
         void init();
-
-        void hmiServerStatus(hmi_server_status_t status);
 
     private:
         // Archivo de logs
@@ -79,14 +75,13 @@ class TUIManager : public QObject
             WELLCOME_SCREEN,
             HOME_SCREEN,
             EXIT_SCREEN,
-            HMI_INFO_SCREEN,
             TEST_SCREEN,
             USERS_SCREEN
         };
 
         typedef struct home_screen_option
         {
-            QString text;
+            QString text = "Sin titulo";
             Screen screen = NO_IMPLEMENTED_SCREEN;
         }home_screen_option_t;
 
@@ -105,6 +100,7 @@ class TUIManager : public QObject
         void closeApplication();
 
     private slots:
+        // Evento de recepción de tecla
         void consoleNewKey(const int key);
 };
 
