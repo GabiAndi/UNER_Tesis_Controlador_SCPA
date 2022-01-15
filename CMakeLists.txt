@@ -21,9 +21,9 @@ set(PROJECT_SOURCES
     tuimanager.h tuimanager.cpp
     consolelistener.h consolelistener.cpp
     hmiservermanager.h hmiservermanager.cpp
-    hmiprotocolmanager.h hmiprotocolmanager.cpp
     hmiusersmanager.h hmiusersmanager.cpp
-    hmiclientmanager.h hmiclientmanager.cpp
+    hmiclient.h hmiclient.cpp
+    hmiuser.h hmiuser.cpp
 )
 
 # Libreria de protocolo de comunicacíon
