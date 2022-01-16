@@ -27,13 +27,13 @@ class HMIUsersManager : public QObject
         explicit HMIUsersManager(QObject *parent = nullptr);
         ~HMIUsersManager();
 
-        static bool addUser(const QString &user, const QString &password);
-        static bool removeUser(const QString &user, const QString &password);
-        static bool renameUser(const QString &user, const QString &password,
-                        const QString &newUser, const QString &newPassword);
+        static bool addUser(const QString &userName, const QString &password);
+        static bool removeUser(const QString &userName, const QString &password);
+        static bool renameUser(const QString &userName, const QString &password,
+                        const QString &newUserName, const QString &newPassword);
         static uint8_t getNumberUsers();
         static QList<QStringList> listUsers();
-        static bool loginUser(const QString &user, const QString &password);
+        static bool loginUser(const QString &userName, const QString &password);
 
     private:
         static QJsonArray readUsers();

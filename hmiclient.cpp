@@ -1,40 +1,7 @@
 #include "hmiclient.h"
 
-HMIClient::HMIClient(QObject *parent)
-    : QObject{parent}
-{
-
-}
-
-HMIClient::~HMIClient()
-{
-    // Protocolo
-    delete hmiProtocol;
-
-    delete tcpSocket;
-}
-
-void HMIClient::tcpSocketDisconnect()
-{
-    tcpSocket->disconnectFromHost();
-}
-
-void HMIClient::tcpSocketDisconnected()
-{
-    emit clientDisconnected(this);
-}
-
-QTcpSocket *HMIClient::getTcpSocket() const
-{
-    return tcpSocket;
-}
-
-void HMIClient::setTcpSocket(QTcpSocket *newTcpSocket)
-{
-    tcpSocket = newTcpSocket;
-}
-
-void HMIClient::init()
+HMIClient::HMIClient(QTcpSocket *tcpSocket, QObject *parent)
+    : QObject{parent}, tcpSocket{tcpSocket}
 {
     // Conexion
     tcpSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
@@ -46,15 +13,41 @@ void HMIClient::init()
 
     connect(tcpSocket, &QTcpSocket::readyRead, this, [this]()
     {
-        hmiProtocol->read(tcpSocket->readAll());
+        hmiProtocol->read(this->tcpSocket->readAll());
     });
 
     connect(hmiProtocol, &HMIProtocol::readyWrite, this, [this](const QByteArray package)
     {
-        tcpSocket->write(package);
+        this->tcpSocket->write(package);
     });
 
     connect(hmiProtocol, &HMIProtocol::readyRead, this, &HMIClient::newPackage);
+}
+
+HMIClient::~HMIClient()
+{
+    // Protocolo
+    delete hmiProtocol;
+}
+
+void HMIClient::tcpSocketDisconnect()
+{
+    tcpSocket->disconnectFromHost();
+}
+
+void HMIClient::sendLoginError()
+{
+    hmiProtocol->write(Command::LOGIN_REQUEST, QByteArray().append(LoginRequest::LOGIN_ERROR));
+}
+
+void HMIClient::tcpSocketDisconnected()
+{
+    emit clientDisconnected(this);
+}
+
+QTcpSocket *HMIClient::getTcpSocket() const
+{
+    return tcpSocket;
 }
 
 void HMIClient::newPackage(const uint8_t cmd, const QByteArray payload)
@@ -70,10 +63,10 @@ void HMIClient::newPackage(const uint8_t cmd, const QByteArray payload)
          */
         case Command::ALIVE:
         {
-            if ((uint8_t)(payload.at(0)) != (uint8_t)(0xFF))
+            if ((uint8_t)(payload.at(0)) != Payload::PAYLOAD_OK)
                 break;
 
-            hmiProtocol->write(Command::ALIVE, QByteArray().append((uint8_t)(0xFF)));
+            hmiProtocol->write(Command::ALIVE, QByteArray().append(Payload::PAYLOAD_OK));
 
             break;
         }
@@ -88,13 +81,13 @@ void HMIClient::newPackage(const uint8_t cmd, const QByteArray payload)
         {
             uint8_t userLength = payload.at(0);
 
-            QString user(payload.mid(1, userLength));
+            QString userName(payload.mid(1, userLength));
 
             uint8_t passwordLength = payload.at(1 + userLength);
 
             QString password(payload.mid(1 + userLength + 1, passwordLength));
 
-            emit clientLogin(this, user, password);
+            emit clientLogin(this, userName, password);
 
             break;
         }

@@ -12,31 +12,36 @@
 #include <QObject>
 
 #include "hmiclient.h"
+#include "hmiprotocoldata.h"
+
+using namespace hmiprotocoldata;
 
 class HMIUser : public HMIClient
 {
         Q_OBJECT
 
     public:
-        explicit HMIUser(QString user, QString password, QObject *parent = nullptr);
+        explicit HMIUser(QString userName, QString password, QTcpSocket *tcpSocket,
+                         QObject *parent = nullptr);
         ~HMIUser();
 
-        QString getUser();
+        QString getUserName();
         QString getPassword();
 
     signals:
+        void userForcedConnected(HMIUser *user, const QString userName, const QString password,
+                                 bool confirm);
+
         void userDisconnected(HMIUser *user);
 
-    protected:
-        // Protocolo
-        enum Command : uint8_t
-        {
-            ALIVE = 0xA0,
-            FORCE_LOGIN = 0xA2
-        };
+    public slots:
+        void sendLoginOk();
+        void sendLoginBusy();
+        void sendLoginPass();
 
+    protected:
         // Datos de sesion
-        QString user;
+        QString userName;
         QString password;
 
     protected slots:

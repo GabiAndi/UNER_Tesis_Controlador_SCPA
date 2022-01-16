@@ -49,13 +49,17 @@ class HMIServerManager : public QObject
         HMIUser *activeUser = nullptr;
 
     private slots:
-        // Conexiones entrantes
+        // Conexiones
+        void socketDisconnection(QTcpSocket *tcpSocket);
+
         void clientConnection();
         void clientConnectionError(const QAbstractSocket::SocketError socketError);
         void clientDisconnection(HMIClient *client);
 
-        void clientLogin(HMIClient *client, const QString user, const QString password);
+        void clientLogin(HMIClient *client, const QString userName, const QString password);
 
+        void userForceConnection(HMIUser *user, const QString userName, const QString password,
+                                 bool confirm);
         void userDisconnection(HMIUser *user);
 };
 

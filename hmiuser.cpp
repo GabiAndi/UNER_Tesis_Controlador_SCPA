@@ -1,7 +1,7 @@
 #include "hmiuser.h"
 
-HMIUser::HMIUser(QString user, QString password, QObject *parent)
-    : HMIClient{parent}, user{user}, password{password}
+HMIUser::HMIUser(QString userName, QString password, QTcpSocket *tcpSocket, QObject *parent)
+    : HMIClient{tcpSocket, parent}, userName{userName}, password{password}
 {
 
 }
@@ -11,14 +11,29 @@ HMIUser::~HMIUser()
 
 }
 
-QString HMIUser::getUser()
+QString HMIUser::getUserName()
 {
-    return user;
+    return userName;
 }
 
 QString HMIUser::getPassword()
 {
     return password;
+}
+
+void HMIUser::sendLoginOk()
+{
+    hmiProtocol->write(Command::LOGIN_REQUEST, QByteArray().append(LoginRequest::LOGIN_OK));
+}
+
+void HMIUser::sendLoginBusy()
+{
+    hmiProtocol->write(Command::LOGIN_REQUEST, QByteArray().append(LoginRequest::LOGIN_BUSY));
+}
+
+void HMIUser::sendLoginPass()
+{
+    hmiProtocol->write(Command::LOGIN_REQUEST, QByteArray().append(LoginRequest::LOGIN_PASS));
 }
 
 void HMIUser::tcpSocketDisconnected()
@@ -39,10 +54,10 @@ void HMIUser::newPackage(const uint8_t cmd, const QByteArray payload)
          */
         case Command::ALIVE:
         {
-            if ((uint8_t)(payload.at(0)) != (uint8_t)(0xFF))
+            if ((uint8_t)(payload.at(0)) != Payload::PAYLOAD_OK)
                 break;
 
-            hmiProtocol->write(Command::ALIVE, QByteArray().append((uint8_t)(0xFF)));
+            hmiProtocol->write(Command::ALIVE, QByteArray().append(Payload::PAYLOAD_OK));
 
             break;
         }
@@ -55,6 +70,18 @@ void HMIUser::newPackage(const uint8_t cmd, const QByteArray payload)
          */
         case Command::FORCE_LOGIN:
         {
+            bool confirm = payload.at(0);
+
+            uint8_t userLength = payload.at(1);
+
+            QString userName(payload.mid(2, userLength));
+
+            uint8_t passwordLength = payload.at(2 + userLength);
+
+            QString password(payload.mid(2 + userLength + 1, passwordLength));
+
+            emit userForcedConnected(this, userName, password, confirm);
+
             break;
         }
     }

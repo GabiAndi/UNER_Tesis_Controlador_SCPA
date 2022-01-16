@@ -35,23 +35,23 @@ QList<QStringList> HMIUsersManager::listUsers()
     return users;
 }
 
-bool HMIUsersManager::loginUser(const QString &user, const QString &password)
+bool HMIUsersManager::loginUser(const QString &userName, const QString &password)
 {
     QJsonObject userLogin;
 
-    userLogin.insert("user", QJsonValue(user));
+    userLogin.insert("user", QJsonValue(userName));
     userLogin.insert("password", QJsonValue(password));
 
     return readUsers().contains(userLogin);
 }
 
-bool HMIUsersManager::addUser(const QString &user, const QString &password)
+bool HMIUsersManager::addUser(const QString &userName, const QString &password)
 {
     QJsonArray users = readUsers();
 
     QJsonObject newUser;
 
-    newUser.insert("user", QJsonValue(user));
+    newUser.insert("user", QJsonValue(userName));
     newUser.insert("password", QJsonValue(password));
 
     if (!users.contains(newUser))
@@ -66,13 +66,13 @@ bool HMIUsersManager::addUser(const QString &user, const QString &password)
     return false;
 }
 
-bool HMIUsersManager::removeUser(const QString &user, const QString &password)
+bool HMIUsersManager::removeUser(const QString &userName, const QString &password)
 {
     QJsonArray users = readUsers();
 
     QJsonObject userToRemove;
 
-    userToRemove.insert("user", QJsonValue(user));
+    userToRemove.insert("user", QJsonValue(userName));
     userToRemove.insert("password", QJsonValue(password));
 
     if (users.contains(userToRemove))
@@ -93,14 +93,14 @@ bool HMIUsersManager::removeUser(const QString &user, const QString &password)
     return false;
 }
 
-bool HMIUsersManager::renameUser(const QString &user, const QString &password,
-                                 const QString &newUser, const QString &newPassword)
+bool HMIUsersManager::renameUser(const QString &userName, const QString &password,
+                                 const QString &newUserName, const QString &newPassword)
 {
     QJsonArray users = readUsers();
 
     QJsonObject userToRename;
 
-    userToRename.insert("user", QJsonValue(user));
+    userToRename.insert("user", QJsonValue(userName));
     userToRename.insert("password", QJsonValue(password));
 
     if (users.contains(userToRename))
@@ -111,7 +111,7 @@ bool HMIUsersManager::renameUser(const QString &user, const QString &password,
             {
                 users.removeAt(i);
 
-                addUser(newUser, newPassword);
+                addUser(newUserName, newPassword);
 
                 return true;
             }
