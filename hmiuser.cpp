@@ -21,19 +21,19 @@ QString HMIUser::getPassword()
     return password;
 }
 
-void HMIUser::sendLoginOk()
+void HMIUser::sendLoginForceRequired()
 {
-    hmiProtocol->write(Command::LOGIN_REQUEST, QByteArray().append(LoginRequest::LOGIN_OK));
+    hmiProtocol->write(Command::LOGIN_REQUEST, QByteArray().append(LoginRequest::LOGIN_FORCE_REQUIRED));
 }
 
-void HMIUser::sendLoginBusy()
+void HMIUser::sendLoginCorrect()
 {
-    hmiProtocol->write(Command::LOGIN_REQUEST, QByteArray().append(LoginRequest::LOGIN_BUSY));
+    hmiProtocol->write(Command::LOGIN_REQUEST, QByteArray().append(LoginRequest::LOGIN_CORRECT));
 }
 
-void HMIUser::sendLoginPass()
+void HMIUser::sendDisconnectOtherUserLogin()
 {
-    hmiProtocol->write(Command::LOGIN_REQUEST, QByteArray().append(LoginRequest::LOGIN_PASS));
+    hmiProtocol->write(Command::DISCONNECT_CODE, QByteArray().append(DisconnectCode::OTHER_USER_LOGIN));
 }
 
 void HMIUser::tcpSocketDisconnected()
@@ -44,7 +44,7 @@ void HMIUser::tcpSocketDisconnected()
 void HMIUser::newPackage(const uint8_t cmd, const QByteArray payload)
 {
     // Se analiza el comando recibido
-    switch (cmd)
+    switch ((Command)(cmd))
     {
         /*
          * ALIVE
@@ -52,12 +52,17 @@ void HMIUser::newPackage(const uint8_t cmd, const QByteArray payload)
          * Si recibimos un alive lo devolvemos automaticamente
          * sin informar al client manager.
          */
-        case Command::ALIVE:
+        case Command::KEEP_ALIVE:
         {
-            if ((uint8_t)(payload.at(0)) != Payload::PAYLOAD_OK)
-                break;
+            if ((uint8_t)(payload.at(0)) == KeepAliveMode::REPLY)
+            {
+                hmiProtocol->write(Command::KEEP_ALIVE, QByteArray().append(KeepAliveMode::REQUEST));
+            }
 
-            hmiProtocol->write(Command::ALIVE, QByteArray().append(Payload::PAYLOAD_OK));
+            else if ((uint8_t)(payload.at(0)) == KeepAliveMode::REQUEST)
+            {
+
+            }
 
             break;
         }
@@ -70,19 +75,14 @@ void HMIUser::newPackage(const uint8_t cmd, const QByteArray payload)
          */
         case Command::FORCE_LOGIN:
         {
-            bool confirm = payload.at(0);
+            bool connect = ((ForceLogin)(payload.at(0)) == ForceLogin::FORCE_CONNECT);
 
-            uint8_t userLength = payload.at(1);
-
-            QString userName(payload.mid(2, userLength));
-
-            uint8_t passwordLength = payload.at(2 + userLength);
-
-            QString password(payload.mid(2 + userLength + 1, passwordLength));
-
-            emit userForcedConnected(this, userName, password, confirm);
+            emit userForceLogin(this, connect);
 
             break;
         }
+
+        default:
+            break;
     }
 }

@@ -12,7 +12,6 @@
 #include <QObject>
 
 #include <QTcpSocket>
-#include <QTimer>
 
 #include "hmiprotocol.h"
 #include "hmiprotocoldata.h"
@@ -36,7 +35,10 @@ class HMIClient : public QObject
     public slots:
         void tcpSocketDisconnect();
 
+        void sendAlive();
+
         void sendLoginError();
+        void sendDisconnectTimeOut();
 
     protected:
         // Conexion

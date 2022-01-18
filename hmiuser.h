@@ -29,22 +29,22 @@ class HMIUser : public HMIClient
         QString getPassword();
 
     signals:
-        void userForcedConnected(HMIUser *user, const QString userName, const QString password,
-                                 bool confirm);
+        void userForceLogin(HMIUser *user, bool connect);
 
         void userDisconnected(HMIUser *user);
 
     public slots:
-        void sendLoginOk();
-        void sendLoginBusy();
-        void sendLoginPass();
+        void sendLoginForceRequired();
+        void sendLoginCorrect();
 
-    protected:
+        void sendDisconnectOtherUserLogin();
+
+    private:
         // Datos de sesion
         QString userName;
         QString password;
 
-    protected slots:
+    private slots:
         // Conexion
         void tcpSocketDisconnected() override;
 

@@ -4,7 +4,7 @@ HMIClient::HMIClient(QTcpSocket *tcpSocket, QObject *parent)
     : QObject{parent}, tcpSocket{tcpSocket}
 {
     // Conexion
-    tcpSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+    tcpSocket->setSocketOption(QAbstractSocket::SocketOption::KeepAliveOption, 1);
 
     connect(tcpSocket, &QTcpSocket::disconnected, this, &HMIClient::tcpSocketDisconnected);
 
@@ -35,9 +35,19 @@ void HMIClient::tcpSocketDisconnect()
     tcpSocket->disconnectFromHost();
 }
 
+void HMIClient::sendAlive()
+{
+    hmiProtocol->write(Command::KEEP_ALIVE, QByteArray().append(KeepAliveMode::REPLY));
+}
+
 void HMIClient::sendLoginError()
 {
     hmiProtocol->write(Command::LOGIN_REQUEST, QByteArray().append(LoginRequest::LOGIN_ERROR));
+}
+
+void HMIClient::sendDisconnectTimeOut()
+{
+    hmiProtocol->write(Command::DISCONNECT_CODE, QByteArray().append(DisconnectCode::LOGIN_TIMEOUT));
 }
 
 void HMIClient::tcpSocketDisconnected()
@@ -53,7 +63,7 @@ QTcpSocket *HMIClient::getTcpSocket() const
 void HMIClient::newPackage(const uint8_t cmd, const QByteArray payload)
 {
     // Se analiza el comando recibido
-    switch (cmd)
+    switch ((Command)(cmd))
     {
         /*
          * ALIVE
@@ -61,12 +71,17 @@ void HMIClient::newPackage(const uint8_t cmd, const QByteArray payload)
          * Si recibimos un alive lo devolvemos automaticamente
          * sin informar al client manager.
          */
-        case Command::ALIVE:
+        case Command::KEEP_ALIVE:
         {
-            if ((uint8_t)(payload.at(0)) != Payload::PAYLOAD_OK)
-                break;
+            if ((uint8_t)(payload.at(0)) == KeepAliveMode::REPLY)
+            {
+                hmiProtocol->write(Command::KEEP_ALIVE, QByteArray().append(KeepAliveMode::REQUEST));
+            }
 
-            hmiProtocol->write(Command::ALIVE, QByteArray().append(Payload::PAYLOAD_OK));
+            else if ((uint8_t)(payload.at(0)) == KeepAliveMode::REQUEST)
+            {
+
+            }
 
             break;
         }
@@ -91,5 +106,8 @@ void HMIClient::newPackage(const uint8_t cmd, const QByteArray payload)
 
             break;
         }
+
+        default:
+            break;
     }
 }
