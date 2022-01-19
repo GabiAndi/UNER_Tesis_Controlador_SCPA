@@ -82,23 +82,29 @@ void HMIServerManager::clientLogin(HMIClient *client, const QString userName, co
 
         connect(newUser, &HMIUser::userDisconnected, this, &HMIServerManager::userDisconnection);
 
+        client->stopTimeOut();
+        client->deleteLater();
+
         // Marcamos el usuario como activo
         if (activeUser == nullptr)
         {
             activeUser = newUser;
 
+            activeUser->stopTimeOut();
+            activeUser->sendLoginCorrect();
+
             logFile->println("El usuario " +
                              activeUser->getUserName() +
                              " se conecto correctamente desde " +
                              activeUser->getTcpSocket()->localAddress().toString());
-
-            activeUser->sendLoginCorrect();
         }
 
         // Hay un usuario que ya se encuentra activo
         else
         {
             connect(newUser, &HMIUser::userForceLogin, this, &HMIServerManager::userForceLogin);
+
+            newUser->sendLoginForceRequired();
 
             logFile->println("El usuario " +
                              newUser->getUserName() +
@@ -108,22 +114,18 @@ void HMIServerManager::clientLogin(HMIClient *client, const QString userName, co
                              activeUser->getUserName() +
                              " ya esta activo desde " +
                              activeUser->getTcpSocket()->localAddress().toString());
-
-            newUser->sendLoginForceRequired();
         }
-
-        client->deleteLater();
     }
 
     else
     {
+        client->sendLoginError();
+
         logFile->println("El cliente quizo autenticarse como " +
                          userName +
                          " desde " +
                          client->getTcpSocket()->localAddress().toString() +
                          ", pero el nombre de usuario o la contrasena no son correctos");
-
-        client->sendLoginError();
     }
 }
 
@@ -131,6 +133,11 @@ void HMIServerManager::userForceLogin(HMIUser *user, bool connect)
 {
     if (connect)
     {
+        // Detenemos el timeout
+        user->stopTimeOut();
+
+        disconnect(user, &HMIUser::userForceLogin, this, &HMIServerManager::userForceLogin);
+
         // Marcamos el usuario como activo
         logFile->println("El usuario " +
                          user->getUserName() +
@@ -141,12 +148,12 @@ void HMIServerManager::userForceLogin(HMIUser *user, bool connect)
                          " que estaba conectado desde " +
                          activeUser->getTcpSocket()->localAddress().toString());
 
+        // Desconectamos el usuario activo actual
         activeUser->sendDisconnectOtherUserLogin();
         activeUser->tcpSocketDisconnect();
 
+        // Establecemos el nuevo usuario como el activo
         activeUser = user;
-
-        disconnect(activeUser, &HMIUser::userForceLogin, this, &HMIServerManager::userForceLogin);
 
         activeUser->sendLoginCorrect();
     }

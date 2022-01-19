@@ -12,9 +12,12 @@
 #include <QObject>
 
 #include <QTcpSocket>
+#include <QTimer>
 
 #include "hmiprotocol.h"
 #include "hmiprotocoldata.h"
+
+#define MAX_LOGIN_TIMEOUT           10000
 
 using namespace hmiprotocoldata;
 
@@ -33,8 +36,13 @@ class HMIClient : public QObject
         void clientLogin(HMIClient *client, const QString userName, const QString password);
 
     public slots:
+        // TimeOut
+        void stopTimeOut();
+
+        // Eventos socket
         void tcpSocketDisconnect();
 
+        // Comandos
         void sendAlive();
 
         void sendLoginError();
@@ -46,6 +54,9 @@ class HMIClient : public QObject
 
         // Protocolo
         HMIProtocol *hmiProtocol = nullptr;
+
+        // Timer de timeout
+        QTimer *timerTimeOut = nullptr;
 
     protected slots:
         // Slot de desconexion

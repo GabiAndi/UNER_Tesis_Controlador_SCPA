@@ -94,27 +94,27 @@ void TUIManager::refreshScreen()
 
     switch (tuiState->currentScreen)
     {
-        case TUIManager::Screen::WELLCOME_SCREEN:
+        case Screen::WELLCOME_SCREEN:
             welcomeScreen();
 
             break;
 
-        case TUIManager::Screen::HOME_SCREEN:
+        case Screen::HOME_SCREEN:
             homeScreen();
 
             break;
 
-        case TUIManager::Screen::USERS_SCREEN:
+        case Screen::USERS_SCREEN:
             usersScreen();
 
             break;
 
-        case TUIManager::Screen::TEST_SCREEN:
+        case Screen::TEST_SCREEN:
             testScreen();
 
             break;
 
-        case TUIManager::Screen::EXIT_SCREEN:
+        case Screen::EXIT_SCREEN:
             exitScreen();
 
             break;
@@ -161,19 +161,19 @@ void TUIManager::consoleNewKey(const int key)
         // Enter
         case 10:
             // Si estamos en el menu principal vamos a la pantalla seleccionada
-            if (tuiState->currentScreen == TUIManager::Screen::HOME_SCREEN)
+            if (tuiState->currentScreen == Screen::HOME_SCREEN)
             {
                 tuiState->currentScreen = homeScreenOptions->at(tuiState->homeScreenIndex).screen;
             }
 
             // Si estamos en el mensaje de bienvenida nos vamos al menu principal
-            else if (tuiState->currentScreen == TUIManager::Screen::WELLCOME_SCREEN)
+            else if (tuiState->currentScreen == Screen::WELLCOME_SCREEN)
             {
-                tuiState->currentScreen = TUIManager::Screen::HOME_SCREEN;
+                tuiState->currentScreen = Screen::HOME_SCREEN;
             }
 
             // Si estamos la pantalla de salida
-            else if (tuiState->currentScreen == TUIManager::Screen::EXIT_SCREEN)
+            else if (tuiState->currentScreen == Screen::EXIT_SCREEN)
             {
                 closeApplication();
             }
@@ -183,15 +183,15 @@ void TUIManager::consoleNewKey(const int key)
         // Escape
         case 27:
             // Salimos de la pantalla de test si presionamos dos veces escape
-            if ((tuiState->currentScreen == TUIManager::Screen::TEST_SCREEN) &&
+            if ((tuiState->currentScreen == Screen::TEST_SCREEN) &&
                      (tuiState->lastKey != key))
             {
-                tuiState->currentScreen = TUIManager::Screen::TEST_SCREEN;
+                tuiState->currentScreen = Screen::TEST_SCREEN;
             }
 
             else
             {
-                tuiState->currentScreen = TUIManager::Screen::HOME_SCREEN;
+                tuiState->currentScreen = Screen::HOME_SCREEN;
             }
 
             break;

@@ -22,10 +22,26 @@ HMIClient::HMIClient(QTcpSocket *tcpSocket, QObject *parent)
     });
 
     connect(hmiProtocol, &HMIProtocol::readyRead, this, &HMIClient::newPackage);
+
+    // Timer
+    timerTimeOut = new QTimer(this);
+
+    timerTimeOut->setSingleShot(true);
+
+    connect(timerTimeOut, &QTimer::timeout, this, [this]()
+    {
+        sendDisconnectTimeOut();
+        tcpSocketDisconnect();
+    });
+
+    timerTimeOut->start(MAX_LOGIN_TIMEOUT);
 }
 
 HMIClient::~HMIClient()
 {
+    // Timer
+    delete timerTimeOut;
+
     // Protocolo
     delete hmiProtocol;
 }
@@ -52,12 +68,19 @@ void HMIClient::sendDisconnectTimeOut()
 
 void HMIClient::tcpSocketDisconnected()
 {
+    timerTimeOut->stop();
+
     emit clientDisconnected(this);
 }
 
 QTcpSocket *HMIClient::getTcpSocket() const
 {
     return tcpSocket;
+}
+
+void HMIClient::stopTimeOut()
+{
+    timerTimeOut->stop();
 }
 
 void HMIClient::newPackage(const uint8_t cmd, const QByteArray payload)
