@@ -16,6 +16,7 @@
 #include "logfile.h"
 #include "tuimanager.h"
 #include "hmiservermanager.h"
+#include "controlmanager.h"
 
 class SCPAManager : public QObject
 {
@@ -40,6 +41,10 @@ class SCPAManager : public QObject
         // HMI Server
         QThread *hmiServerThread = nullptr;
         HMIServerManager *hmiServerManager = nullptr;
+
+        // Controlador de entradas y salidas
+        QThread *controlManagerThread = nullptr;
+        ControlManager *controlManager = nullptr;
 };
 
 #endif // SCPAMANAGER_H

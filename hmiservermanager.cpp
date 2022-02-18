@@ -82,6 +82,18 @@ void HMIServerManager::clientLogin(HMIClient *client, const QString userName, co
 
         connect(newUser, &HMIUser::userDisconnected, this, &HMIServerManager::userDisconnection);
 
+        connect(newUser, &HMIUser::setSimulationLvFoso, this, &HMIServerManager::setSimulationLvFoso);
+        connect(newUser, &HMIUser::setSimulationLvLodo, this, &HMIServerManager::setSimulationLvLodo);
+        connect(newUser, &HMIUser::setSimulationTemp, this, &HMIServerManager::setSimulationTemp);
+        connect(newUser, &HMIUser::setSimulationOD, this, &HMIServerManager::setSimulationOD);
+        connect(newUser, &HMIUser::setSimulationPhAnox, this, &HMIServerManager::setSimulationPhAnox);
+        connect(newUser, &HMIUser::setSimulationPhAireacion, this, &HMIServerManager::setSimulationPhAireacion);
+
+        connect(newUser, &HMIUser::setSimulationMotorCurrent, this, &HMIServerManager::setSimulationMotorCurrent);
+        connect(newUser, &HMIUser::setSimulationMotorVoltaje, this, &HMIServerManager::setSimulationMotorVoltaje);
+        connect(newUser, &HMIUser::setSimulationMotorTemp, this, &HMIServerManager::setSimulationMotorTemp);
+        connect(newUser, &HMIUser::setSimulationMotorVelocity, this, &HMIServerManager::setSimulationMotorVelocity);
+
         client->stopTimeOut();
         client->deleteLater();
 

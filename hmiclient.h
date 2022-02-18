@@ -17,7 +17,7 @@
 #include "hmiprotocol.h"
 #include "hmiprotocoldata.h"
 
-#define MAX_LOGIN_TIMEOUT           10000
+#define MAX_LOGIN_TIMEOUT           60000
 
 using namespace hmiprotocoldata;
 

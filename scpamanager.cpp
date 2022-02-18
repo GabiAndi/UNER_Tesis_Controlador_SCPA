@@ -22,6 +22,13 @@ SCPAManager::~SCPAManager()
     delete hmiServerManager;
     delete hmiServerThread;
 
+    // Controlador de entradas y salidas
+    controlManagerThread->quit();
+    controlManagerThread->wait();
+
+    delete controlManager;
+    delete controlManagerThread;
+
     // Cierre del archivo de log
     logFile->println("Finalizado");
 
@@ -62,6 +69,30 @@ void SCPAManager::init()
     connect(hmiServerThread, &QThread::started, hmiServerManager, &HMIServerManager::init);
 
     hmiServerThread->start();
+
+    // Controlador de entradas y salidas
+    controlManagerThread = new QThread(this);
+    controlManager = new ControlManager();
+
+    controlManager->moveToThread(controlManagerThread);
+
+    controlManager->setObjectName("ControlManager");
+
+    connect(controlManagerThread, &QThread::started, controlManager, &ControlManager::init);
+
+    connect(hmiServerManager, &HMIServerManager::setSimulationLvFoso, controlManager, &ControlManager::setLvFoso);
+    connect(hmiServerManager, &HMIServerManager::setSimulationLvLodo, controlManager, &ControlManager::setLvLodo);
+    connect(hmiServerManager, &HMIServerManager::setSimulationTemp, controlManager, &ControlManager::setTemp);
+    connect(hmiServerManager, &HMIServerManager::setSimulationOD, controlManager, &ControlManager::setOD);
+    connect(hmiServerManager, &HMIServerManager::setSimulationPhAnox, controlManager, &ControlManager::setPhAnox);
+    connect(hmiServerManager, &HMIServerManager::setSimulationPhAireacion, controlManager, &ControlManager::setPhAireacion);
+
+    connect(hmiServerManager, &HMIServerManager::setSimulationMotorCurrent, controlManager, &ControlManager::setMotorCurrent);
+    connect(hmiServerManager, &HMIServerManager::setSimulationMotorVoltaje, controlManager, &ControlManager::setMotorVoltaje);
+    connect(hmiServerManager, &HMIServerManager::setSimulationMotorTemp, controlManager, &ControlManager::setMotorTemp);
+    connect(hmiServerManager, &HMIServerManager::setSimulationMotorVelocity, controlManager, &ControlManager::setMotorVelocity);
+
+    controlManagerThread->start();
 
     // Inicio
     logFile->println("Cargado");

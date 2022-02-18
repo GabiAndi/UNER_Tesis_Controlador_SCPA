@@ -29,15 +29,35 @@ class HMIUser : public HMIClient
         QString getPassword();
 
     signals:
+        // Estado de conexion
         void userForceLogin(HMIUser *user, bool connect);
 
         void userDisconnected(HMIUser *user);
 
+        // Seteo de variables simuladas
+        // Pileta
+        void setSimulationLvFoso(float lv);
+        void setSimulationLvLodo(float lv);
+        void setSimulationTemp(float temp);
+        void setSimulationOD(float od);
+        void setSimulationPhAnox(float ph);
+        void setSimulationPhAireacion(float ph);
+
+        // Motores
+        void setSimulationMotorCurrent(float current);
+        void setSimulationMotorVoltaje(float voltaje);
+        void setSimulationMotorTemp(float temp);
+        void setSimulationMotorVelocity(float velocity);
+
     public slots:
+        // Conexion
         void sendLoginForceRequired();
         void sendLoginCorrect();
 
         void sendDisconnectOtherUserLogin();
+
+        // Parametros de simulacion
+        void sendRequestSetParam(hmiprotocoldata::SimulationSensor sensor);
 
     private:
         // Datos de sesion

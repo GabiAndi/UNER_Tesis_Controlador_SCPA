@@ -38,6 +38,22 @@ class HMIServerManager : public QObject
     public slots:
         void init();
 
+    signals:
+        // Seteo de variables simuladas
+        // Pileta
+        void setSimulationLvFoso(float lv);
+        void setSimulationLvLodo(float lv);
+        void setSimulationTemp(float temp);
+        void setSimulationOD(float od);
+        void setSimulationPhAnox(float ph);
+        void setSimulationPhAireacion(float ph);
+
+        // Motores
+        void setSimulationMotorCurrent(float current);
+        void setSimulationMotorVoltaje(float voltaje);
+        void setSimulationMotorTemp(float temp);
+        void setSimulationMotorVelocity(float velocity);
+
     private:
         // Archivo de logs
         LogFile *logFile = nullptr;

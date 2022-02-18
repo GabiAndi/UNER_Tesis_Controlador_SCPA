@@ -19,22 +19,15 @@ add_subdirectory("../HMIProtocol" "../build-HMIProtocol")
 
 qt_add_executable(${PROJECT_NAME}
     "main.cpp"
-    "scpamanager.h"
-    "scpamanager.cpp"
-    "logfile.h"
-    "logfile.cpp"
-    "tuimanager.h"
-    "tuimanager.cpp"
-    "consolelistener.h"
-    "consolelistener.cpp"
-    "hmiservermanager.h"
-    "hmiservermanager.cpp"
-    "hmiusersmanager.h"
-    "hmiusersmanager.cpp"
-    "hmiclient.h"
-    "hmiclient.cpp"
-    "hmiuser.h"
-    "hmiuser.cpp"
+    "scpamanager.h" "scpamanager.cpp"
+    "logfile.h" "logfile.cpp"
+    "tuimanager.h" "tuimanager.cpp"
+    "consolelistener.h" "consolelistener.cpp"
+    "hmiservermanager.h" "hmiservermanager.cpp"
+    "hmiusersmanager.h" "hmiusersmanager.cpp"
+    "hmiclient.h" "hmiclient.cpp"
+    "hmiuser.h" "hmiuser.cpp"
+    "controlmanager.h" "controlmanager.cpp"
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -44,3 +37,11 @@ target_link_libraries(${PROJECT_NAME}
         HMIProtocol
         ncurses
 )
+
+#set(INSTALL_DESTDIR "/home/pi/${PROJECT_NAME}")
+
+#install(TARGETS ${PROJECT_NAME}
+#    RUNTIME DESTINATION "${INSTALL_DESTDIR}"
+#    BUNDLE DESTINATION "${INSTALL_DESTDIR}"
+#    LIBRARY DESTINATION "${INSTALL_DESTDIR}"
+#)
