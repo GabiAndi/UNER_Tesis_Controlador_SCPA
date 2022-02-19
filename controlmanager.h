@@ -12,6 +12,9 @@
 #include <QObject>
 
 #include "logfile.h"
+#include "hmiprotocoldata.h"
+
+using namespace hmiprotocoldata;
 
 class ControlManager : public QObject
 {
@@ -24,6 +27,9 @@ class ControlManager : public QObject
     public slots:
         void init();
 
+        // Se pide los valores de los sensores
+        void getParameterValue(hmiprotocoldata::Sensor sensor);
+
         // Seteo de variables simuladas
         // Pileta
         void setLvFoso(float lv);
@@ -33,11 +39,9 @@ class ControlManager : public QObject
         void setPhAnox(float ph);
         void setPhAireacion(float ph);
 
-        // Motores
-        void setMotorCurrent(float current);
-        void setMotorVoltaje(float voltaje);
-        void setMotorTemp(float temp);
-        void setMotorVelocity(float velocity);
+    signals:
+        // Se envia los parametros de los sensores
+        void sendParameterValue(hmiprotocoldata::Sensor sensor, float value);
 
     private:
         // Archivo de logs

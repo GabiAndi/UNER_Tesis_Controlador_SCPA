@@ -36,7 +36,24 @@ void HMIUser::sendDisconnectOtherUserLogin()
     hmiProtocol->write(Command::DISCONNECT_CODE, QByteArray().append(DisconnectCode::OTHER_USER_LOGIN));
 }
 
-void HMIUser::sendRequestSetParam(SimulationSensor sensor)
+void HMIUser::sendParameterValue(Sensor sensor, float value)
+{
+    DataConverter converter;
+
+    converter.f[0] = value;
+
+    QByteArray data;
+
+    data.append(sensor);
+    data.append(converter.u8[0]);
+    data.append(converter.u8[1]);
+    data.append(converter.u8[2]);
+    data.append(converter.u8[3]);
+
+    hmiProtocol->write(Command::REQUEST_GET_PARAM, data);
+}
+
+void HMIUser::sendRequestSetParam(Sensor sensor)
 {
     hmiProtocol->write(Command::REQUEST_SET_PARAM, QByteArray().append(sensor));
 }
@@ -88,6 +105,18 @@ void HMIUser::newPackage(const uint8_t cmd, const QByteArray payload)
         }
 
         /*
+         * GET_PARAM
+         *
+         * Se pide los valores de los sensores del sistema
+         */
+        case Command::GET_PARAM:
+        {
+            emit getParameterValue((Sensor)(payload.at(0)));
+
+            break;
+        }
+
+        /*
          * SET_PARAM
          *
          * Se establece los valores de los sensores para la simulación
@@ -101,60 +130,43 @@ void HMIUser::newPackage(const uint8_t cmd, const QByteArray payload)
             converter.u8[2] = payload.at(3);
             converter.u8[3] = payload.at(4);
 
-            switch ((SimulationSensor)(payload.at(0)))
+            switch ((Sensor)(payload.at(0)))
             {
-                case SimulationSensor::SENSOR_LV_FOSO:
+                case Sensor::SENSOR_LV_FOSO:
                     emit setSimulationLvFoso(converter.f[0]);
 
                     break;
 
-                case SimulationSensor::SENSOR_LV_LODO:
+                case Sensor::SENSOR_LV_LODO:
                     emit setSimulationLvLodo(converter.f[0]);
 
                     break;
 
-                case SimulationSensor::SENSOR_TEMP:
+                case Sensor::SENSOR_TEMP:
                     emit setSimulationTemp(converter.f[0]);
 
                     break;
 
-                case SimulationSensor::SENSOR_OD:
+                case Sensor::SENSOR_OD:
                     emit setSimulationOD(converter.f[0]);
 
                     break;
 
-                case SimulationSensor::SENSOR_PH_ANOX:
+                case Sensor::SENSOR_PH_ANOX:
                     emit setSimulationPhAnox(converter.f[0]);
 
                     break;
 
-                case SimulationSensor::SENSOR_PH_AIREACION:
+                case Sensor::SENSOR_PH_AIREACION:
                     emit setSimulationPhAireacion(converter.f[0]);
 
                     break;
 
-                case SimulationSensor::SENSOR_MOTOR_CURRENT:
-                    emit setSimulationMotorCurrent(converter.f[0]);
-
-                    break;
-
-                case SimulationSensor::SENSOR_MOTOR_VOLTAJE:
-                    emit setSimulationMotorVoltaje(converter.f[0]);
-
-                    break;
-
-                case SimulationSensor::SENSOR_MOTOR_TEMP:
-                    emit setSimulationMotorTemp(converter.f[0]);
-
-                    break;
-
-                case SimulationSensor::SENSOR_MOTOR_VELOCITY:
-                    emit setSimulationMotorVelocity(converter.f[0]);
-
+                default:
                     break;
             }
 
-            sendRequestSetParam((SimulationSensor)(payload.at(0)));
+            sendRequestSetParam((Sensor)(payload.at(0)));
 
             break;
         }

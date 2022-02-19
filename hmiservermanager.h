@@ -38,7 +38,13 @@ class HMIServerManager : public QObject
     public slots:
         void init();
 
+        // Se envia los parametros de los sensores
+        void sendParameterValue(hmiprotocoldata::Sensor sensor, float value);
+
     signals:
+        // Se pide los valores de los sensores
+        void getParameterValue(hmiprotocoldata::Sensor sensor);
+
         // Seteo de variables simuladas
         // Pileta
         void setSimulationLvFoso(float lv);
@@ -47,12 +53,6 @@ class HMIServerManager : public QObject
         void setSimulationOD(float od);
         void setSimulationPhAnox(float ph);
         void setSimulationPhAireacion(float ph);
-
-        // Motores
-        void setSimulationMotorCurrent(float current);
-        void setSimulationMotorVoltaje(float voltaje);
-        void setSimulationMotorTemp(float temp);
-        void setSimulationMotorVelocity(float velocity);
 
     private:
         // Archivo de logs
@@ -64,6 +64,9 @@ class HMIServerManager : public QObject
         // Usuario activo
         HMIUser *activeUser = nullptr;
 
+        // Marco el usuario actual como el activo
+        void setActiveUser(HMIUser *user);
+
     private slots:
         // Conexiones
         void clientConnection();
@@ -72,7 +75,7 @@ class HMIServerManager : public QObject
 
         void clientLogin(HMIClient *client, const QString userName, const QString password);
 
-        void userForceLogin(HMIUser *user, bool connect);
+        void userForceLogin(HMIUser *user, bool connecting);
         void userDisconnection(HMIUser *user);
 };
 

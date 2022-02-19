@@ -46,6 +46,32 @@ void HMIServerManager::init()
     }
 }
 
+void HMIServerManager::sendParameterValue(Sensor sensor, float value)
+{
+    if (activeUser != nullptr)
+    {
+        activeUser->sendParameterValue(sensor, value);
+    }
+}
+
+void HMIServerManager::setActiveUser(HMIUser *user)
+{
+    activeUser = user;
+
+    activeUser->stopTimeOut();
+
+    connect(activeUser, &HMIUser::getParameterValue, this, &HMIServerManager::getParameterValue);
+
+    connect(activeUser, &HMIUser::setSimulationLvFoso, this, &HMIServerManager::setSimulationLvFoso);
+    connect(activeUser, &HMIUser::setSimulationLvLodo, this, &HMIServerManager::setSimulationLvLodo);
+    connect(activeUser, &HMIUser::setSimulationTemp, this, &HMIServerManager::setSimulationTemp);
+    connect(activeUser, &HMIUser::setSimulationOD, this, &HMIServerManager::setSimulationOD);
+    connect(activeUser, &HMIUser::setSimulationPhAnox, this, &HMIServerManager::setSimulationPhAnox);
+    connect(activeUser, &HMIUser::setSimulationPhAireacion, this, &HMIServerManager::setSimulationPhAireacion);
+
+    activeUser->sendLoginCorrect();
+}
+
 void HMIServerManager::clientConnection()
 {
     // Nuevo cliente
@@ -82,28 +108,13 @@ void HMIServerManager::clientLogin(HMIClient *client, const QString userName, co
 
         connect(newUser, &HMIUser::userDisconnected, this, &HMIServerManager::userDisconnection);
 
-        connect(newUser, &HMIUser::setSimulationLvFoso, this, &HMIServerManager::setSimulationLvFoso);
-        connect(newUser, &HMIUser::setSimulationLvLodo, this, &HMIServerManager::setSimulationLvLodo);
-        connect(newUser, &HMIUser::setSimulationTemp, this, &HMIServerManager::setSimulationTemp);
-        connect(newUser, &HMIUser::setSimulationOD, this, &HMIServerManager::setSimulationOD);
-        connect(newUser, &HMIUser::setSimulationPhAnox, this, &HMIServerManager::setSimulationPhAnox);
-        connect(newUser, &HMIUser::setSimulationPhAireacion, this, &HMIServerManager::setSimulationPhAireacion);
-
-        connect(newUser, &HMIUser::setSimulationMotorCurrent, this, &HMIServerManager::setSimulationMotorCurrent);
-        connect(newUser, &HMIUser::setSimulationMotorVoltaje, this, &HMIServerManager::setSimulationMotorVoltaje);
-        connect(newUser, &HMIUser::setSimulationMotorTemp, this, &HMIServerManager::setSimulationMotorTemp);
-        connect(newUser, &HMIUser::setSimulationMotorVelocity, this, &HMIServerManager::setSimulationMotorVelocity);
-
         client->stopTimeOut();
         client->deleteLater();
 
         // Marcamos el usuario como activo
         if (activeUser == nullptr)
         {
-            activeUser = newUser;
-
-            activeUser->stopTimeOut();
-            activeUser->sendLoginCorrect();
+            setActiveUser(newUser);
 
             logFile->println("El usuario " +
                              activeUser->getUserName() +
@@ -141,14 +152,18 @@ void HMIServerManager::clientLogin(HMIClient *client, const QString userName, co
     }
 }
 
-void HMIServerManager::userForceLogin(HMIUser *user, bool connect)
+void HMIServerManager::userForceLogin(HMIUser *user, bool connecting)
 {
-    if (connect)
+    if (connecting)
     {
-        // Detenemos el timeout
-        user->stopTimeOut();
+        // Desconectamos el usuario activo actual
+        activeUser->sendDisconnectOtherUserLogin();
+        activeUser->tcpSocketDisconnect();
 
-        disconnect(user, &HMIUser::userForceLogin, this, &HMIServerManager::userForceLogin);
+        // Establecemos el nuevo usuario como el activo
+        setActiveUser(user);
+
+        disconnect(activeUser, &HMIUser::userForceLogin, this, &HMIServerManager::userForceLogin);
 
         // Marcamos el usuario como activo
         logFile->println("El usuario " +
@@ -159,15 +174,6 @@ void HMIServerManager::userForceLogin(HMIUser *user, bool connect)
                          activeUser->getUserName() +
                          " que estaba conectado desde " +
                          activeUser->getTcpSocket()->localAddress().toString());
-
-        // Desconectamos el usuario activo actual
-        activeUser->sendDisconnectOtherUserLogin();
-        activeUser->tcpSocketDisconnect();
-
-        // Establecemos el nuevo usuario como el activo
-        activeUser = user;
-
-        activeUser->sendLoginCorrect();
     }
 
     else

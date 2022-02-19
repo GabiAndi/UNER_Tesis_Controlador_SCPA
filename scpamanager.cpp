@@ -80,17 +80,16 @@ void SCPAManager::init()
 
     connect(controlManagerThread, &QThread::started, controlManager, &ControlManager::init);
 
+    connect(hmiServerManager, &HMIServerManager::getParameterValue, controlManager, &ControlManager::getParameterValue);
+
+    connect(controlManager, &ControlManager::sendParameterValue, hmiServerManager, &HMIServerManager::sendParameterValue);
+
     connect(hmiServerManager, &HMIServerManager::setSimulationLvFoso, controlManager, &ControlManager::setLvFoso);
     connect(hmiServerManager, &HMIServerManager::setSimulationLvLodo, controlManager, &ControlManager::setLvLodo);
     connect(hmiServerManager, &HMIServerManager::setSimulationTemp, controlManager, &ControlManager::setTemp);
     connect(hmiServerManager, &HMIServerManager::setSimulationOD, controlManager, &ControlManager::setOD);
     connect(hmiServerManager, &HMIServerManager::setSimulationPhAnox, controlManager, &ControlManager::setPhAnox);
     connect(hmiServerManager, &HMIServerManager::setSimulationPhAireacion, controlManager, &ControlManager::setPhAireacion);
-
-    connect(hmiServerManager, &HMIServerManager::setSimulationMotorCurrent, controlManager, &ControlManager::setMotorCurrent);
-    connect(hmiServerManager, &HMIServerManager::setSimulationMotorVoltaje, controlManager, &ControlManager::setMotorVoltaje);
-    connect(hmiServerManager, &HMIServerManager::setSimulationMotorTemp, controlManager, &ControlManager::setMotorTemp);
-    connect(hmiServerManager, &HMIServerManager::setSimulationMotorVelocity, controlManager, &ControlManager::setMotorVelocity);
 
     controlManagerThread->start();
 

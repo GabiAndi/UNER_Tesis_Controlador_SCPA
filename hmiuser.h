@@ -34,6 +34,9 @@ class HMIUser : public HMIClient
 
         void userDisconnected(HMIUser *user);
 
+        // Se pide los valores de los sensores
+        void getParameterValue(hmiprotocoldata::Sensor sensor);
+
         // Seteo de variables simuladas
         // Pileta
         void setSimulationLvFoso(float lv);
@@ -43,12 +46,6 @@ class HMIUser : public HMIClient
         void setSimulationPhAnox(float ph);
         void setSimulationPhAireacion(float ph);
 
-        // Motores
-        void setSimulationMotorCurrent(float current);
-        void setSimulationMotorVoltaje(float voltaje);
-        void setSimulationMotorTemp(float temp);
-        void setSimulationMotorVelocity(float velocity);
-
     public slots:
         // Conexion
         void sendLoginForceRequired();
@@ -56,8 +53,11 @@ class HMIUser : public HMIClient
 
         void sendDisconnectOtherUserLogin();
 
+        // Se envia los parametros de los sensores
+        void sendParameterValue(hmiprotocoldata::Sensor sensor, float value);
+
         // Parametros de simulacion
-        void sendRequestSetParam(hmiprotocoldata::SimulationSensor sensor);
+        void sendRequestSetParam(hmiprotocoldata::Sensor sensor);
 
     private:
         // Datos de sesion
