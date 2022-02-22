@@ -14,6 +14,9 @@
 #include "logfile.h"
 #include "hmiprotocoldata.h"
 
+#include "frequencydriver.h"
+#include "pidcontroller.h"
+
 using namespace hmiprotocoldata;
 
 class ControlManager : public QObject
@@ -84,6 +87,12 @@ class ControlManager : public QObject
         }set_point_t;
 
         set_point_t *set_points = nullptr;
+
+        // Controlador del variador
+        FrequencyDriver *frequencyDriver = nullptr;
+
+        // Controlador del sistem
+        PIDController *pidController = nullptr;
 };
 
 #endif // CONTROLMANAGER_H

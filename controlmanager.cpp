@@ -11,6 +11,9 @@ ControlManager::~ControlManager()
     delete sensors;
     delete set_points;
 
+    delete frequencyDriver;
+    delete pidController;
+
     // Cierre del archivo de log
     logFile->println("Finalizado");
 
@@ -30,6 +33,12 @@ void ControlManager::init()
 
     // Iniciamos los set points
     set_points = new set_point_t;
+
+    // Controlado del variador
+    frequencyDriver = new FrequencyDriver(this);
+
+    // Controlador del sistema
+    pidController = new PIDController(this);
 
     // Mensaje de finalizacion de carga
     logFile->println("Cargado");

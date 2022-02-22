@@ -11,8 +11,13 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 COMPONENTS Core REQUIRED)
-find_package(Qt6 COMPONENTS Network REQUIRED)
+find_package(Qt6
+    COMPONENTS
+        Core
+        Network
+        Sql
+    REQUIRED
+)
 
 # Libreria de protocolo de comunicacíon
 add_subdirectory("../HMIProtocol" "../build-HMIProtocol")
@@ -28,20 +33,25 @@ qt_add_executable(${PROJECT_NAME}
     "hmiclient.h" "hmiclient.cpp"
     "hmiuser.h" "hmiuser.cpp"
     "controlmanager.h" "controlmanager.cpp"
+    "frequencydriver.h" "frequencydriver.cpp"
+    "pidcontroller.h" "pidcontroller.cpp"
+    "metricsmanager.h" "metricsmanager.cpp"
 )
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         Qt6::Core
         Qt6::Network
+        Qt6::Sql
         HMIProtocol
         ncurses
+        wiringPi
 )
 
-#set(INSTALL_DESTDIR "/home/pi/${PROJECT_NAME}")
+set(INSTALL_DESTDIR "/home/pi/${PROJECT_NAME}")
 
-#install(TARGETS ${PROJECT_NAME}
-#    RUNTIME DESTINATION "${INSTALL_DESTDIR}"
-#    BUNDLE DESTINATION "${INSTALL_DESTDIR}"
-#    LIBRARY DESTINATION "${INSTALL_DESTDIR}"
-#)
+install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION "${INSTALL_DESTDIR}"
+    BUNDLE DESTINATION "${INSTALL_DESTDIR}"
+    LIBRARY DESTINATION "${INSTALL_DESTDIR}"
+)
