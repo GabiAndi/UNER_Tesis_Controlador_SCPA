@@ -6,12 +6,12 @@ FrequencyDriver::FrequencyDriver(QObject *parent)
     // Inicio de los pines gpio
     wiringPiSetup();
 
-    pinMode(GPIO::PIN_ON_OFF, INPUT);
+    pinMode(GPIO::PIN_ON_OFF, OUTPUT);
 
-    pinMode(GPIO::PIN_VEL_BYTE1, INPUT);
-    pinMode(GPIO::PIN_VEL_BYTE2, INPUT);
-    pinMode(GPIO::PIN_VEL_BYTE3, INPUT);
-    pinMode(GPIO::PIN_VEL_BYTE4, INPUT);
+    pinMode(GPIO::PIN_VEL_BYTE1, OUTPUT);
+    pinMode(GPIO::PIN_VEL_BYTE2, OUTPUT);
+    pinMode(GPIO::PIN_VEL_BYTE3, OUTPUT);
+    pinMode(GPIO::PIN_VEL_BYTE4, OUTPUT);
 
     digitalWrite(GPIO::PIN_ON_OFF, LOW);
 

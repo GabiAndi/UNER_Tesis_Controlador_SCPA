@@ -23,7 +23,7 @@ class FrequencyDriver : public QObject
 
         enum GPIO
         {
-            PIN_ON_OFF = 21,
+            PIN_ON_OFF = 0,
             PIN_VEL_BYTE1,
             PIN_VEL_BYTE2,
             PIN_VEL_BYTE3,
