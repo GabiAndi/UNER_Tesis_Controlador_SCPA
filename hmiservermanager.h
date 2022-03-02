@@ -54,6 +54,10 @@ class HMIServerManager : public QObject
         void setSimulationPhAnox(float ph);
         void setSimulationPhAireacion(float ph);
 
+        // Estado del sistema
+        void setInitSystem();
+        void setStopSystem();
+
     private:
         // Archivo de logs
         LogFile *logFile = nullptr;

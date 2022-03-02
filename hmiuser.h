@@ -46,6 +46,10 @@ class HMIUser : public HMIClient
         void setSimulationPhAnox(float ph);
         void setSimulationPhAireacion(float ph);
 
+        // Estado del sistema
+        void setInitSystem();
+        void setStopSystem();
+
     public slots:
         // Conexion
         void sendLoginForceRequired();

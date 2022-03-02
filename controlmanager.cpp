@@ -129,3 +129,13 @@ void ControlManager::setPhAireacion(float ph)
 {
     sensors->pileta.phAireacion = ph;
 }
+
+void ControlManager::setInitSystem()
+{
+
+}
+
+void ControlManager::setStopSystem()
+{
+
+}

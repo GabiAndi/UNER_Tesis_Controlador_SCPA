@@ -171,6 +171,30 @@ void HMIUser::newPackage(const uint8_t cmd, const QByteArray payload)
             break;
         }
 
+        /*
+         * INIT_SYSTEM
+         *
+         * Inicia el motor y el sistema de control
+         */
+        case Command::INIT_SYSTEM:
+        {
+            emit setInitSystem();
+
+            break;
+        }
+
+        /*
+         * STOP_SYSTEM
+         *
+         * Inicia el motor y el sistema de control
+         */
+        case Command::STOP_SYSTEM:
+        {
+            emit setStopSystem();
+
+            break;
+        }
+
         default:
             break;
     }

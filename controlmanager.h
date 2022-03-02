@@ -42,6 +42,10 @@ class ControlManager : public QObject
         void setPhAnox(float ph);
         void setPhAireacion(float ph);
 
+        // Estado del sistema
+        void setInitSystem();
+        void setStopSystem();
+
     signals:
         // Se envia los parametros de los sensores
         void sendParameterValue(hmiprotocoldata::Sensor sensor, float value);

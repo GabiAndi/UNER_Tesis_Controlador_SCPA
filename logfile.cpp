@@ -9,7 +9,7 @@ LogFile::LogFile(QObject *parent)
         QDir().mkdir(logSubdir);
     }
 
-    file.setFileName(logSubdir + "/" + parent->objectName() + ".log");
+    file.setFileName(QDir::currentPath() + "/" + logSubdir + "/" + parent->objectName() + ".log");
 
     // Se abre el archivo para añadir contenido al final
     file.open(QIODevice::OpenModeFlag::ReadWrite | QIODevice::OpenModeFlag::Truncate);
