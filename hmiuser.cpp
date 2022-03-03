@@ -195,6 +195,25 @@ void HMIUser::newPackage(const uint8_t cmd, const QByteArray payload)
             break;
         }
 
+        /*
+         * SET_SETPOINT_OD
+         *
+         * Establece el valor del set point OD
+         */
+        case Command::SET_SETPOINT_OD:
+        {
+            DataConverter converter;
+
+            converter.u8[0] = payload.at(0);
+            converter.u8[1] = payload.at(1);
+            converter.u8[2] = payload.at(2);
+            converter.u8[3] = payload.at(3);
+
+            emit setSetPointOD(converter.f[0]);
+
+            break;
+        }
+
         default:
             break;
     }

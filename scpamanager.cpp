@@ -94,6 +94,8 @@ void SCPAManager::init()
     connect(hmiServerManager, &HMIServerManager::setInitSystem, controlManager, &ControlManager::setInitSystem);
     connect(hmiServerManager, &HMIServerManager::setStopSystem, controlManager, &ControlManager::setStopSystem);
 
+    connect(hmiServerManager, &HMIServerManager::setSetPointOD, controlManager, &ControlManager::setSetPointOD);
+
     controlManagerThread->start();
 
     // Inicio

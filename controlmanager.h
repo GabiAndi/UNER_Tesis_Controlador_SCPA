@@ -11,6 +11,8 @@
 
 #include <QObject>
 
+#include <QTimer>
+
 #include "logfile.h"
 #include "hmiprotocoldata.h"
 
@@ -45,6 +47,9 @@ class ControlManager : public QObject
         // Estado del sistema
         void setInitSystem();
         void setStopSystem();
+
+        // Set point
+        void setSetPointOD(float setPointOD);
 
     signals:
         // Se envia los parametros de los sensores
@@ -88,15 +93,19 @@ class ControlManager : public QObject
         typedef struct set_point
         {
             float od = 3.4;
+            bool active = false;
         }set_point_t;
 
-        set_point_t *set_points = nullptr;
+        set_point_t *setPoints = nullptr;
 
         // Controlador del variador
         FrequencyDriver *frequencyDriver = nullptr;
 
         // Controlador del sistem
         PIDController *pidController = nullptr;
+
+        // Timer de PID
+        QTimer *pidTimer = nullptr;
 };
 
 #endif // CONTROLMANAGER_H

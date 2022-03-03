@@ -8,8 +8,12 @@ ControlManager::ControlManager(QObject *parent)
 
 ControlManager::~ControlManager()
 {
+    setPoints->active = false;
+    pidTimer->stop();
+    frequencyDriver->stop();
+
     delete sensors;
-    delete set_points;
+    delete setPoints;
 
     delete frequencyDriver;
     delete pidController;
@@ -32,13 +36,33 @@ void ControlManager::init()
     sensors = new sensors_t;
 
     // Iniciamos los set points
-    set_points = new set_point_t;
+    setPoints = new set_point_t;
 
     // Controlado del variador
     frequencyDriver = new FrequencyDriver(this);
 
     // Controlador del sistema
     pidController = new PIDController(this);
+
+    // Timer de PID
+    pidTimer = new QTimer(this);
+
+    connect(pidTimer, &QTimer::timeout, this, [this](){
+        if (setPoints->active)
+        {
+            uint8_t freq = pidController->getFreq(setPoints->od, sensors->pileta.od, sensors->pileta.temp);
+
+            frequencyDriver->start();
+            frequencyDriver->setFreq(freq);
+        }
+
+        else
+        {
+            frequencyDriver->stop();
+        }
+    });
+
+    pidTimer->start(500);
 
     // Mensaje de finalizacion de carga
     logFile->println("Cargado");
@@ -97,6 +121,11 @@ void ControlManager::getParameterValue(Sensor sensor)
             emit sendParameterValue(Sensor::SENSOR_MOTOR_VELOCITY, sensors->motor.velocity);
 
             break;
+
+        case Sensor::SET_POINT_OD:
+            emit sendParameterValue(Sensor::SET_POINT_OD, setPoints->od);
+
+            break;
     }
 }
 
@@ -132,10 +161,15 @@ void ControlManager::setPhAireacion(float ph)
 
 void ControlManager::setInitSystem()
 {
-
+    setPoints->active = true;
 }
 
 void ControlManager::setStopSystem()
 {
+    setPoints->active = false;
+}
 
+void ControlManager::setSetPointOD(float setPointOD)
+{
+    setPoints->od = setPointOD;
 }

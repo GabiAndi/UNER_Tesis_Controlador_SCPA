@@ -50,6 +50,9 @@ class HMIUser : public HMIClient
         void setInitSystem();
         void setStopSystem();
 
+        // Set point
+        void setSetPointOD(float setPointOD);
+
     public slots:
         // Conexion
         void sendLoginForceRequired();

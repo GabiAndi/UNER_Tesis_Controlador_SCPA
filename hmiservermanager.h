@@ -58,6 +58,9 @@ class HMIServerManager : public QObject
         void setInitSystem();
         void setStopSystem();
 
+        // Set point
+        void setSetPointOD(float setPointOD);
+
     private:
         // Archivo de logs
         LogFile *logFile = nullptr;

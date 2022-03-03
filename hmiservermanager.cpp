@@ -72,6 +72,8 @@ void HMIServerManager::setActiveUser(HMIUser *user)
     connect(activeUser, &HMIUser::setInitSystem, this, &HMIServerManager::setInitSystem);
     connect(activeUser, &HMIUser::setStopSystem, this, &HMIServerManager::setStopSystem);
 
+    connect(activeUser, &HMIUser::setSetPointOD, this, &HMIServerManager::setSetPointOD);
+
     activeUser->sendLoginCorrect();
 }
 

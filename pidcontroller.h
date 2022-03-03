@@ -18,6 +18,8 @@ class PIDController : public QObject
     public:
         explicit PIDController(QObject *parent = nullptr);
         ~PIDController();
+
+        uint8_t getFreq(float setPointOD, float od, float temp);
 };
 
 #endif // PIDCONTROLLER_H
