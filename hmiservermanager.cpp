@@ -46,11 +46,19 @@ void HMIServerManager::init()
     }
 }
 
-void HMIServerManager::sendParameterValue(Sensor sensor, float value)
+void HMIServerManager::sendSensorValue(Sensor sensor, float value)
 {
     if (activeUser != nullptr)
     {
-        activeUser->sendParameterValue(sensor, value);
+        activeUser->sendSensorValue(sensor, value);
+    }
+}
+
+void HMIServerManager::sendSystemState(SystemState state, float value)
+{
+    if (activeUser != nullptr)
+    {
+        activeUser->sendSystemState(state, value);
     }
 }
 
@@ -60,19 +68,13 @@ void HMIServerManager::setActiveUser(HMIUser *user)
 
     activeUser->stopTimeOut();
 
-    connect(activeUser, &HMIUser::getParameterValue, this, &HMIServerManager::getParameterValue);
+    // Sensores
+    connect(activeUser, &HMIUser::getSensorValue, this, &HMIServerManager::getSensorValue);
+    connect(activeUser, &HMIUser::setSensorValue, this, &HMIServerManager::setSensorValue);
 
-    connect(activeUser, &HMIUser::setSimulationLvFoso, this, &HMIServerManager::setSimulationLvFoso);
-    connect(activeUser, &HMIUser::setSimulationLvLodo, this, &HMIServerManager::setSimulationLvLodo);
-    connect(activeUser, &HMIUser::setSimulationTemp, this, &HMIServerManager::setSimulationTemp);
-    connect(activeUser, &HMIUser::setSimulationOD, this, &HMIServerManager::setSimulationOD);
-    connect(activeUser, &HMIUser::setSimulationPhAnox, this, &HMIServerManager::setSimulationPhAnox);
-    connect(activeUser, &HMIUser::setSimulationPhAireacion, this, &HMIServerManager::setSimulationPhAireacion);
-
-    connect(activeUser, &HMIUser::setInitSystem, this, &HMIServerManager::setInitSystem);
-    connect(activeUser, &HMIUser::setStopSystem, this, &HMIServerManager::setStopSystem);
-
-    connect(activeUser, &HMIUser::setSetPointOD, this, &HMIServerManager::setSetPointOD);
+    // Estado del sistema
+    connect(activeUser, &HMIUser::getSystemState, this, &HMIServerManager::getSystemState);
+    connect(activeUser, &HMIUser::setSystemState, this, &HMIServerManager::setSystemState);
 
     activeUser->sendLoginCorrect();
 }

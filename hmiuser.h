@@ -34,24 +34,13 @@ class HMIUser : public HMIClient
 
         void userDisconnected(HMIUser *user);
 
-        // Se pide los valores de los sensores
-        void getParameterValue(hmiprotocoldata::Sensor sensor);
-
-        // Seteo de variables simuladas
-        // Pileta
-        void setSimulationLvFoso(float lv);
-        void setSimulationLvLodo(float lv);
-        void setSimulationTemp(float temp);
-        void setSimulationOD(float od);
-        void setSimulationPhAnox(float ph);
-        void setSimulationPhAireacion(float ph);
+        // Sensores
+        void getSensorValue(hmiprotocoldata::Sensor sensor);
+        void setSensorValue(hmiprotocoldata::Sensor sensor, float value);
 
         // Estado del sistema
-        void setInitSystem();
-        void setStopSystem();
-
-        // Set point
-        void setSetPointOD(float setPointOD);
+        void getSystemState(hmiprotocoldata::SystemState state);
+        void setSystemState(hmiprotocoldata::SystemState state, float value);
 
     public slots:
         // Conexion
@@ -60,11 +49,13 @@ class HMIUser : public HMIClient
 
         void sendDisconnectOtherUserLogin();
 
-        // Se envia los parametros de los sensores
-        void sendParameterValue(hmiprotocoldata::Sensor sensor, float value);
+        // Sensores
+        void sendSensorValue(hmiprotocoldata::Sensor sensor, float value);
+        void sendRequestSetSensor(hmiprotocoldata::Sensor sensor);
 
-        // Parametros de simulacion
-        void sendRequestSetParam(hmiprotocoldata::Sensor sensor);
+        // Estado del sistema
+        void sendSystemState(hmiprotocoldata::SystemState state, float value);
+        void sendRequestSetSystemState(hmiprotocoldata::SystemState state);
 
     private:
         // Datos de sesion

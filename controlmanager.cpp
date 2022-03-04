@@ -8,12 +8,12 @@ ControlManager::ControlManager(QObject *parent)
 
 ControlManager::~ControlManager()
 {
-    setPoints->active = false;
+    systemState->active = false;
     pidTimer->stop();
     frequencyDriver->stop();
 
     delete sensors;
-    delete setPoints;
+    delete systemState;
 
     delete frequencyDriver;
     delete pidController;
@@ -36,7 +36,7 @@ void ControlManager::init()
     sensors = new sensors_t;
 
     // Iniciamos los set points
-    setPoints = new set_point_t;
+    systemState = new system_state_t;
 
     // Controlado del variador
     frequencyDriver = new FrequencyDriver(this);
@@ -47,20 +47,7 @@ void ControlManager::init()
     // Timer de PID
     pidTimer = new QTimer(this);
 
-    connect(pidTimer, &QTimer::timeout, this, [this](){
-        if (setPoints->active)
-        {
-            uint8_t freq = pidController->getFreq(setPoints->od, sensors->pileta.od, sensors->pileta.temp);
-
-            frequencyDriver->start();
-            frequencyDriver->setFreq(freq);
-        }
-
-        else
-        {
-            frequencyDriver->stop();
-        }
-    });
+    connect(pidTimer, &QTimer::timeout, this, &ControlManager::syncPID);
 
     pidTimer->start(500);
 
@@ -68,108 +55,170 @@ void ControlManager::init()
     logFile->println("Cargado");
 }
 
-void ControlManager::getParameterValue(Sensor sensor)
+void ControlManager::getSensorValue(Sensor sensor)
 {
     switch (sensor)
     {
         case Sensor::SENSOR_LV_FOSO:
-            emit sendParameterValue(Sensor::SENSOR_LV_FOSO, sensors->pileta.lvFoso);
+            emit sendSensorValue(Sensor::SENSOR_LV_FOSO, sensors->pileta.lvFoso);
 
             break;
 
         case Sensor::SENSOR_LV_LODO:
-            emit sendParameterValue(Sensor::SENSOR_LV_LODO, sensors->pileta.lvLodo);
+            emit sendSensorValue(Sensor::SENSOR_LV_LODO, sensors->pileta.lvLodo);
 
             break;
 
         case Sensor::SENSOR_TEMP:
-            emit sendParameterValue(Sensor::SENSOR_TEMP, sensors->pileta.temp);
+            emit sendSensorValue(Sensor::SENSOR_TEMP, sensors->pileta.temp);
 
             break;
 
         case Sensor::SENSOR_OD:
-            emit sendParameterValue(Sensor::SENSOR_OD, sensors->pileta.od);
+            emit sendSensorValue(Sensor::SENSOR_OD, sensors->pileta.od);
 
             break;
 
         case Sensor::SENSOR_PH_ANOX:
-            emit sendParameterValue(Sensor::SENSOR_PH_ANOX, sensors->pileta.phAnox);
+            emit sendSensorValue(Sensor::SENSOR_PH_ANOX, sensors->pileta.phAnox);
 
             break;
 
         case Sensor::SENSOR_PH_AIREACION:
-            emit sendParameterValue(Sensor::SENSOR_PH_AIREACION, sensors->pileta.phAireacion);
+            emit sendSensorValue(Sensor::SENSOR_PH_AIREACION, sensors->pileta.phAireacion);
 
             break;
 
         case Sensor::SENSOR_MOTOR_CURRENT:
-            emit sendParameterValue(Sensor::SENSOR_MOTOR_CURRENT, sensors->motor.current);
+            emit sendSensorValue(Sensor::SENSOR_MOTOR_CURRENT, sensors->motor.current);
 
             break;
 
         case Sensor::SENSOR_MOTOR_VOLTAJE:
-            emit sendParameterValue(Sensor::SENSOR_MOTOR_VOLTAJE, sensors->motor.voltaje);
+            emit sendSensorValue(Sensor::SENSOR_MOTOR_VOLTAJE, sensors->motor.voltaje);
 
             break;
 
         case Sensor::SENSOR_MOTOR_TEMP:
-            emit sendParameterValue(Sensor::SENSOR_MOTOR_TEMP, sensors->motor.temperature);
+            emit sendSensorValue(Sensor::SENSOR_MOTOR_TEMP, sensors->motor.temperature);
 
             break;
 
         case Sensor::SENSOR_MOTOR_VELOCITY:
-            emit sendParameterValue(Sensor::SENSOR_MOTOR_VELOCITY, sensors->motor.velocity);
-
-            break;
-
-        case Sensor::SET_POINT_OD:
-            emit sendParameterValue(Sensor::SET_POINT_OD, setPoints->od);
+            emit sendSensorValue(Sensor::SENSOR_MOTOR_VELOCITY, sensors->motor.velocity);
 
             break;
     }
 }
 
-void ControlManager::setLvFoso(float lv)
+void ControlManager::setSensorValue(Sensor sensor, float value)
 {
-    sensors->pileta.lvFoso = lv;
+    switch (sensor)
+    {
+        case Sensor::SENSOR_LV_FOSO:
+            sensors->pileta.lvFoso = value;
+
+            break;
+
+        case Sensor::SENSOR_LV_LODO:
+            sensors->pileta.lvLodo = value;
+
+            break;
+
+        case Sensor::SENSOR_TEMP:
+            sensors->pileta.temp = value;
+
+            break;
+
+        case Sensor::SENSOR_OD:
+            sensors->pileta.od = value;
+
+            break;
+
+        case Sensor::SENSOR_PH_ANOX:
+            sensors->pileta.phAnox = value;
+
+            break;
+
+        case Sensor::SENSOR_PH_AIREACION:
+            sensors->pileta.phAireacion = value;
+
+            break;
+
+        case Sensor::SENSOR_MOTOR_CURRENT:
+            sensors->motor.current = value;
+
+            break;
+
+        case Sensor::SENSOR_MOTOR_VOLTAJE:
+            sensors->motor.voltaje = value;
+
+            break;
+
+        case Sensor::SENSOR_MOTOR_TEMP:
+            sensors->motor.temperature = value;
+
+            break;
+
+        case Sensor::SENSOR_MOTOR_VELOCITY:
+            sensors->motor.velocity = value;
+
+            break;
+    }
 }
 
-void ControlManager::setLvLodo(float lv)
+void ControlManager::getSystemState(SystemState state)
 {
-    sensors->pileta.lvLodo = lv;
+    switch (state)
+    {
+        case SystemState::CONTROL_SYSTEM:
+            emit sendSystemState(state, systemState->active);
+
+            break;
+
+        case SystemState::SETPOINT_OD:
+            emit sendSystemState(state, systemState->od);
+
+            break;
+    }
 }
 
-void ControlManager::setTemp(float temp)
+void ControlManager::setSystemState(SystemState state, float value)
 {
-    sensors->pileta.temp = temp;
+    switch (state)
+    {
+        case SystemState::CONTROL_SYSTEM:
+            systemState->active = value;
+
+            break;
+
+        case SystemState::SETPOINT_OD:
+            systemState->od = value;
+
+            break;
+    }
 }
 
-void ControlManager::setOD(float od)
+void ControlManager::syncPID()
 {
-    sensors->pileta.od = od;
-}
+    if (systemState->active)
+    {
+        uint8_t freq = pidController->getFreq(systemState->od, sensors->pileta.od, sensors->pileta.temp);
 
-void ControlManager::setPhAnox(float ph)
-{
-    sensors->pileta.phAnox = ph;
-}
+        frequencyDriver->start();
+        frequencyDriver->setFreq(freq);
 
-void ControlManager::setPhAireacion(float ph)
-{
-    sensors->pileta.phAireacion = ph;
-}
+        sensors->motor.velocity = freq;
+        sensors->motor.voltaje = 220;
+        sensors->motor.current = 70;
+    }
 
-void ControlManager::setInitSystem()
-{
-    setPoints->active = true;
-}
+    else
+    {
+        frequencyDriver->stop();
 
-void ControlManager::setStopSystem()
-{
-    setPoints->active = false;
-}
-
-void ControlManager::setSetPointOD(float setPointOD)
-{
-    setPoints->od = setPointOD;
+        sensors->motor.velocity = 0;
+        sensors->motor.voltaje = 0;
+        sensors->motor.current = 0;
+    }
 }

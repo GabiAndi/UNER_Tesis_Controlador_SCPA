@@ -32,28 +32,20 @@ class ControlManager : public QObject
     public slots:
         void init();
 
-        // Se pide los valores de los sensores
-        void getParameterValue(hmiprotocoldata::Sensor sensor);
-
-        // Seteo de variables simuladas
-        // Pileta
-        void setLvFoso(float lv);
-        void setLvLodo(float lv);
-        void setTemp(float temp);
-        void setOD(float od);
-        void setPhAnox(float ph);
-        void setPhAireacion(float ph);
+        // Sensores
+        void getSensorValue(hmiprotocoldata::Sensor sensor);
+        void setSensorValue(hmiprotocoldata::Sensor sensor, float value);
 
         // Estado del sistema
-        void setInitSystem();
-        void setStopSystem();
-
-        // Set point
-        void setSetPointOD(float setPointOD);
+        void getSystemState(hmiprotocoldata::SystemState state);
+        void setSystemState(hmiprotocoldata::SystemState state, float value);
 
     signals:
-        // Se envia los parametros de los sensores
-        void sendParameterValue(hmiprotocoldata::Sensor sensor, float value);
+        // Sensores
+        void sendSensorValue(hmiprotocoldata::Sensor sensor, float value);
+
+        // Estado del sistema
+        void sendSystemState(hmiprotocoldata::SystemState state, float value);
 
     private:
         // Archivo de logs
@@ -90,13 +82,13 @@ class ControlManager : public QObject
         sensors_t *sensors = nullptr;
 
         // Estructura de valores de seteo
-        typedef struct set_point
+        typedef struct system_state
         {
-            float od = 3.4;
+            float od = 0;
             bool active = false;
-        }set_point_t;
+        }system_state_t;
 
-        set_point_t *setPoints = nullptr;
+        system_state_t *systemState = nullptr;
 
         // Controlador del variador
         FrequencyDriver *frequencyDriver = nullptr;
@@ -106,6 +98,10 @@ class ControlManager : public QObject
 
         // Timer de PID
         QTimer *pidTimer = nullptr;
+
+    private slots:
+        // Funcion de calculo de PID
+        void syncPID();
 };
 
 #endif // CONTROLMANAGER_H

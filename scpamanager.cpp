@@ -80,21 +80,14 @@ void SCPAManager::init()
 
     connect(controlManagerThread, &QThread::started, controlManager, &ControlManager::init);
 
-    connect(hmiServerManager, &HMIServerManager::getParameterValue, controlManager, &ControlManager::getParameterValue);
+    connect(controlManager, &ControlManager::sendSensorValue, hmiServerManager, &HMIServerManager::sendSensorValue);
+    connect(controlManager, &ControlManager::sendSystemState, hmiServerManager, &HMIServerManager::sendSystemState);
 
-    connect(controlManager, &ControlManager::sendParameterValue, hmiServerManager, &HMIServerManager::sendParameterValue);
+    connect(hmiServerManager, &HMIServerManager::getSensorValue, controlManager, &ControlManager::getSensorValue);
+    connect(hmiServerManager, &HMIServerManager::setSensorValue, controlManager, &ControlManager::setSensorValue);
 
-    connect(hmiServerManager, &HMIServerManager::setSimulationLvFoso, controlManager, &ControlManager::setLvFoso);
-    connect(hmiServerManager, &HMIServerManager::setSimulationLvLodo, controlManager, &ControlManager::setLvLodo);
-    connect(hmiServerManager, &HMIServerManager::setSimulationTemp, controlManager, &ControlManager::setTemp);
-    connect(hmiServerManager, &HMIServerManager::setSimulationOD, controlManager, &ControlManager::setOD);
-    connect(hmiServerManager, &HMIServerManager::setSimulationPhAnox, controlManager, &ControlManager::setPhAnox);
-    connect(hmiServerManager, &HMIServerManager::setSimulationPhAireacion, controlManager, &ControlManager::setPhAireacion);
-
-    connect(hmiServerManager, &HMIServerManager::setInitSystem, controlManager, &ControlManager::setInitSystem);
-    connect(hmiServerManager, &HMIServerManager::setStopSystem, controlManager, &ControlManager::setStopSystem);
-
-    connect(hmiServerManager, &HMIServerManager::setSetPointOD, controlManager, &ControlManager::setSetPointOD);
+    connect(hmiServerManager, &HMIServerManager::getSystemState, controlManager, &ControlManager::getSystemState);
+    connect(hmiServerManager, &HMIServerManager::setSystemState, controlManager, &ControlManager::setSystemState);
 
     controlManagerThread->start();
 

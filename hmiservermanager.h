@@ -39,27 +39,19 @@ class HMIServerManager : public QObject
         void init();
 
         // Se envia los parametros de los sensores
-        void sendParameterValue(hmiprotocoldata::Sensor sensor, float value);
-
-    signals:
-        // Se pide los valores de los sensores
-        void getParameterValue(hmiprotocoldata::Sensor sensor);
-
-        // Seteo de variables simuladas
-        // Pileta
-        void setSimulationLvFoso(float lv);
-        void setSimulationLvLodo(float lv);
-        void setSimulationTemp(float temp);
-        void setSimulationOD(float od);
-        void setSimulationPhAnox(float ph);
-        void setSimulationPhAireacion(float ph);
+        void sendSensorValue(hmiprotocoldata::Sensor sensor, float value);
 
         // Estado del sistema
-        void setInitSystem();
-        void setStopSystem();
+        void sendSystemState(hmiprotocoldata::SystemState state, float value);
 
-        // Set point
-        void setSetPointOD(float setPointOD);
+    signals:
+        // Sensores
+        void getSensorValue(hmiprotocoldata::Sensor sensor);
+        void setSensorValue(hmiprotocoldata::Sensor sensor, float value);
+
+        // Estado del sistema
+        void getSystemState(hmiprotocoldata::SystemState state);
+        void setSystemState(hmiprotocoldata::SystemState state, float value);
 
     private:
         // Archivo de logs

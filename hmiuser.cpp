@@ -36,7 +36,7 @@ void HMIUser::sendDisconnectOtherUserLogin()
     hmiProtocol->write(Command::DISCONNECT_CODE, QByteArray().append(DisconnectCode::OTHER_USER_LOGIN));
 }
 
-void HMIUser::sendParameterValue(Sensor sensor, float value)
+void HMIUser::sendSensorValue(Sensor sensor, float value)
 {
     DataConverter converter;
 
@@ -50,12 +50,34 @@ void HMIUser::sendParameterValue(Sensor sensor, float value)
     data.append(converter.u8[2]);
     data.append(converter.u8[3]);
 
-    hmiProtocol->write(Command::REQUEST_GET_PARAM, data);
+    hmiProtocol->write(Command::REQUEST_GET_SENSOR, data);
 }
 
-void HMIUser::sendRequestSetParam(Sensor sensor)
+void HMIUser::sendRequestSetSensor(Sensor sensor)
 {
-    hmiProtocol->write(Command::REQUEST_SET_PARAM, QByteArray().append(sensor));
+    hmiProtocol->write(Command::REQUEST_SET_SENSOR, QByteArray().append(sensor));
+}
+
+void HMIUser::sendSystemState(hmiprotocoldata::SystemState state, float value)
+{
+    DataConverter converter;
+
+    converter.f[0] = value;
+
+    QByteArray data;
+
+    data.append(state);
+    data.append(converter.u8[0]);
+    data.append(converter.u8[1]);
+    data.append(converter.u8[2]);
+    data.append(converter.u8[3]);
+
+    hmiProtocol->write(Command::REQUEST_GET_SYSTEM_STATE, data);
+}
+
+void HMIUser::sendRequestSetSystemState(hmiprotocoldata::SystemState state)
+{
+    hmiProtocol->write(Command::REQUEST_SET_SYSTEM_STATE, QByteArray().append(state));
 }
 
 void HMIUser::tcpSocketDisconnected()
@@ -105,23 +127,23 @@ void HMIUser::newPackage(const uint8_t cmd, const QByteArray payload)
         }
 
         /*
-         * GET_PARAM
+         * GET_SENSOR
          *
          * Se pide los valores de los sensores del sistema
          */
-        case Command::GET_PARAM:
+        case Command::GET_SENSOR:
         {
-            emit getParameterValue((Sensor)(payload.at(0)));
+            emit getSensorValue((Sensor)(payload.at(0)));
 
             break;
         }
 
         /*
-         * SET_PARAM
+         * SET_SENSOR
          *
          * Se establece los valores de los sensores para la simulación
          */
-        case Command::SET_PARAM:
+        case Command::SET_SENSOR:
         {
             DataConverter converter;
 
@@ -130,86 +152,42 @@ void HMIUser::newPackage(const uint8_t cmd, const QByteArray payload)
             converter.u8[2] = payload.at(3);
             converter.u8[3] = payload.at(4);
 
-            switch ((Sensor)(payload.at(0)))
-            {
-                case Sensor::SENSOR_LV_FOSO:
-                    emit setSimulationLvFoso(converter.f[0]);
+            emit setSensorValue((Sensor)(payload.at(0)), converter.f[0]);
 
-                    break;
-
-                case Sensor::SENSOR_LV_LODO:
-                    emit setSimulationLvLodo(converter.f[0]);
-
-                    break;
-
-                case Sensor::SENSOR_TEMP:
-                    emit setSimulationTemp(converter.f[0]);
-
-                    break;
-
-                case Sensor::SENSOR_OD:
-                    emit setSimulationOD(converter.f[0]);
-
-                    break;
-
-                case Sensor::SENSOR_PH_ANOX:
-                    emit setSimulationPhAnox(converter.f[0]);
-
-                    break;
-
-                case Sensor::SENSOR_PH_AIREACION:
-                    emit setSimulationPhAireacion(converter.f[0]);
-
-                    break;
-
-                default:
-                    break;
-            }
-
-            sendRequestSetParam((Sensor)(payload.at(0)));
+            sendRequestSetSensor((Sensor)(payload.at(0)));
 
             break;
         }
 
         /*
-         * INIT_SYSTEM
+         * GET_SYSTEM_STATE
          *
-         * Inicia el motor y el sistema de control
+         * Lee un estado del sistema
          */
-        case Command::INIT_SYSTEM:
+        case Command::GET_SYSTEM_STATE:
         {
-            emit setInitSystem();
+            emit getSystemState((SystemState)(payload.at(0)));
 
             break;
         }
 
         /*
-         * STOP_SYSTEM
+         * SET_SYSTEM_STATE
          *
-         * Inicia el motor y el sistema de control
+         * Establece un estado
          */
-        case Command::STOP_SYSTEM:
-        {
-            emit setStopSystem();
-
-            break;
-        }
-
-        /*
-         * SET_SETPOINT_OD
-         *
-         * Establece el valor del set point OD
-         */
-        case Command::SET_SETPOINT_OD:
+         case Command::SET_SYSTEM_STATE:
         {
             DataConverter converter;
 
-            converter.u8[0] = payload.at(0);
-            converter.u8[1] = payload.at(1);
-            converter.u8[2] = payload.at(2);
-            converter.u8[3] = payload.at(3);
+            converter.u8[0] = payload.at(1);
+            converter.u8[1] = payload.at(2);
+            converter.u8[2] = payload.at(3);
+            converter.u8[3] = payload.at(4);
 
-            emit setSetPointOD(converter.f[0]);
+            emit setSystemState((SystemState)(payload.at(0)), converter.f[0]);
+
+            sendRequestSetSystemState((SystemState)(payload.at(0)));
 
             break;
         }
