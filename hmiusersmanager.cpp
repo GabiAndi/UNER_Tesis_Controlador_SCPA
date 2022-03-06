@@ -130,7 +130,7 @@ QJsonArray HMIUsersManager::readUsers()
     }
 
     // Se abre el archivo para leer los usuarios
-    QFile usersFile(usersSubdir + "/users.log");
+    QFile usersFile(usersSubdir + "/" + usersFileName);
 
     // Si el archivo no existe se crea
     if (!usersFile.exists())
@@ -155,7 +155,7 @@ void HMIUsersManager::writeUsers(const QJsonArray &users)
     }
 
     // Se abre el archivo para leer los usuarios
-    QFile usersFile(usersSubdir + "/users.log");
+    QFile usersFile(usersSubdir + "/" + usersFileName);
 
     // Si el archivo no existe se crea
     if (!usersFile.exists())

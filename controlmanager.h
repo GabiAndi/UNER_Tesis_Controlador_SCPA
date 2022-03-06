@@ -40,12 +40,20 @@ class ControlManager : public QObject
         void getSystemState(hmiprotocoldata::SystemState state);
         void setSystemState(hmiprotocoldata::SystemState state, float value);
 
+        // Sensores al servidor de metricas
+        void getMetricSensorValue(hmiprotocoldata::Sensor sensor);
+        void getMetricSystemState(hmiprotocoldata::SystemState state);
+
     signals:
         // Sensores
         void sendSensorValue(hmiprotocoldata::Sensor sensor, float value);
 
         // Estado del sistema
         void sendSystemState(hmiprotocoldata::SystemState state, float value);
+
+        // Sensores
+        void sendMetricSensorValue(hmiprotocoldata::Sensor sensor, float value);
+        void sendMetricSystemState(hmiprotocoldata::SystemState state, float value);
 
     private:
         // Archivo de logs

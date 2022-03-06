@@ -17,6 +17,7 @@
 #include "tuimanager.h"
 #include "hmiservermanager.h"
 #include "controlmanager.h"
+#include "metricsmanager.h"
 
 class SCPAManager : public QObject
 {
@@ -45,6 +46,10 @@ class SCPAManager : public QObject
         // Controlador de entradas y salidas
         QThread *controlManagerThread = nullptr;
         ControlManager *controlManager = nullptr;
+
+        // Comunicación con el servidor de métricas
+        QThread *metricsManagerThread = nullptr;
+        MetricsManager *metricsManager = nullptr;
 };
 
 #endif // SCPAMANAGER_H

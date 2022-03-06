@@ -41,6 +41,7 @@ class HMIUsersManager : public QObject
 
         // Usuarios
         inline static const QString usersSubdir = "users";
+        inline static const QString usersFileName = "users.txt";
 };
 
 #endif // HMIUSERSMANAGER_H

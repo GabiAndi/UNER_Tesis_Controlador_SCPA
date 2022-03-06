@@ -29,6 +29,13 @@ SCPAManager::~SCPAManager()
     delete controlManager;
     delete controlManagerThread;
 
+    // Comunicacion con el servidor de metricas
+    metricsManagerThread->quit();
+    metricsManagerThread->wait();
+
+    delete metricsManager;
+    delete metricsManagerThread;
+
     // Cierre del archivo de log
     logFile->println("Finalizado");
 
@@ -70,6 +77,18 @@ void SCPAManager::init()
 
     hmiServerThread->start();
 
+    // Comunicacion con el servidor de metricas
+    metricsManagerThread = new QThread(this);
+    metricsManager = new MetricsManager();
+
+    metricsManager->moveToThread(metricsManagerThread);
+
+    metricsManager->setObjectName("MetricsManager");
+
+    connect(metricsManagerThread, &QThread::started, metricsManager, &MetricsManager::init);
+
+    metricsManagerThread->start();
+
     // Controlador de entradas y salidas
     controlManagerThread = new QThread(this);
     controlManager = new ControlManager();
@@ -88,6 +107,12 @@ void SCPAManager::init()
 
     connect(hmiServerManager, &HMIServerManager::getSystemState, controlManager, &ControlManager::getSystemState);
     connect(hmiServerManager, &HMIServerManager::setSystemState, controlManager, &ControlManager::setSystemState);
+
+    connect(metricsManager, &MetricsManager::getMetricSensorValue, controlManager, &ControlManager::getMetricSensorValue);
+    connect(metricsManager, &MetricsManager::getMetricSystemState, controlManager, &ControlManager::getMetricSystemState);
+
+    connect(controlManager, &ControlManager::sendMetricSensorValue, metricsManager, &MetricsManager::sendMetricSensorValue);
+    connect(controlManager, &ControlManager::sendMetricSystemState, metricsManager, &MetricsManager::sendMetricSystemState);
 
     controlManagerThread->start();
 

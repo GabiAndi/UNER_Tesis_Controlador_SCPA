@@ -199,6 +199,78 @@ void ControlManager::setSystemState(SystemState state, float value)
     }
 }
 
+void ControlManager::getMetricSensorValue(Sensor sensor)
+{
+    switch (sensor)
+    {
+        case Sensor::SENSOR_LV_FOSO:
+            emit sendMetricSensorValue(Sensor::SENSOR_LV_FOSO, sensors->pileta.lvFoso);
+
+            break;
+
+        case Sensor::SENSOR_LV_LODO:
+            emit sendMetricSensorValue(Sensor::SENSOR_LV_LODO, sensors->pileta.lvLodo);
+
+            break;
+
+        case Sensor::SENSOR_TEMP:
+            emit sendMetricSensorValue(Sensor::SENSOR_TEMP, sensors->pileta.temp);
+
+            break;
+
+        case Sensor::SENSOR_OD:
+            emit sendMetricSensorValue(Sensor::SENSOR_OD, sensors->pileta.od);
+
+            break;
+
+        case Sensor::SENSOR_PH_ANOX:
+            emit sendMetricSensorValue(Sensor::SENSOR_PH_ANOX, sensors->pileta.phAnox);
+
+            break;
+
+        case Sensor::SENSOR_PH_AIREACION:
+            emit sendMetricSensorValue(Sensor::SENSOR_PH_AIREACION, sensors->pileta.phAireacion);
+
+            break;
+
+        case Sensor::SENSOR_MOTOR_CURRENT:
+            emit sendMetricSensorValue(Sensor::SENSOR_MOTOR_CURRENT, sensors->motor.current);
+
+            break;
+
+        case Sensor::SENSOR_MOTOR_VOLTAJE:
+            emit sendMetricSensorValue(Sensor::SENSOR_MOTOR_VOLTAJE, sensors->motor.voltaje);
+
+            break;
+
+        case Sensor::SENSOR_MOTOR_TEMP:
+            emit sendMetricSensorValue(Sensor::SENSOR_MOTOR_TEMP, sensors->motor.temperature);
+
+            break;
+
+        case Sensor::SENSOR_MOTOR_VELOCITY:
+            emit sendMetricSensorValue(Sensor::SENSOR_MOTOR_VELOCITY, sensors->motor.velocity);
+
+            break;
+    }
+}
+
+void ControlManager::getMetricSystemState(SystemState state)
+{
+    switch (state)
+    {
+        case SystemState::CONTROL_SYSTEM:
+            emit sendMetricSystemState(state, systemState->active);
+
+            break;
+
+        case SystemState::SETPOINT_OD:
+            emit sendMetricSystemState(state, systemState->od);
+
+            break;
+    }
+}
+
 void ControlManager::syncPID()
 {
     if (systemState->active)

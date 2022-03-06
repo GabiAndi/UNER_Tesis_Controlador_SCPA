@@ -19,7 +19,7 @@ find_package(Qt6
     REQUIRED
 )
 
-# Libreria de protocolo de comunicacíon
+# Libreria de protocolo de comunicación
 add_subdirectory("../HMIProtocol" "../build-HMIProtocol")
 
 qt_add_executable(${PROJECT_NAME}
@@ -36,6 +36,7 @@ qt_add_executable(${PROJECT_NAME}
     "frequencydriver.h" "frequencydriver.cpp"
     "pidcontroller.h" "pidcontroller.cpp"
     "metricsmanager.h" "metricsmanager.cpp"
+    "mysqldatabase.h" "mysqldatabase.cpp"
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -43,12 +44,12 @@ target_link_libraries(${PROJECT_NAME}
         Qt6::Core
         Qt6::Network
         Qt6::Sql
-        HMIProtocol
         ncurses
         wiringPi
+        HMIProtocol
 )
 
-set(INSTALL_DESTDIR "/home/pi/${PROJECT_NAME}")
+set(INSTALL_DESTDIR "/tmp/${PROJECT_NAME}")
 
 install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION "${INSTALL_DESTDIR}"
