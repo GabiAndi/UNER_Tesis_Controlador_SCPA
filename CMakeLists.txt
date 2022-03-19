@@ -37,6 +37,7 @@ qt_add_executable(${PROJECT_NAME}
     "pidcontroller.h" "pidcontroller.cpp"
     "metricsmanager.h" "metricsmanager.cpp"
     "mysqldatabase.h" "mysqldatabase.cpp"
+    "scpa.h" "scpa.cpp"
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -17,6 +17,7 @@ ControlManager::~ControlManager()
 
     delete frequencyDriver;
     delete pidController;
+    delete scpa;
 
     // Cierre del archivo de log
     logFile->println("Finalizado");
@@ -44,12 +45,34 @@ void ControlManager::init()
     // Controlador del sistema
     pidController = new PIDController(this);
 
+    // Sensor de OD
+    scpa = new SCPA(this);
+
+    if (!scpa->init())
+    {
+        logFile->println("No se encontro el archivo de configuracion de sensor de od");
+    }
+
+    else
+    {
+        logFile->println("Configuracion correcta del sensor de OD");
+
+        connect(scpa, &SCPA::scpaConnected, this, &ControlManager::scpaConnected);
+        connect(scpa, &SCPA::scpaErrorConnected, this, &ControlManager::scpaErrorConnected);
+        connect(scpa, &SCPA::scpaDisconnected, this, &ControlManager::scpaDisconnected);
+
+        connect(scpa, &SCPA::readOD, this, [this](float od)
+        {
+            sensors->pileta.od = od;
+        });
+    }
+
     // Timer de PID
     pidTimer = new QTimer(this);
 
     connect(pidTimer, &QTimer::timeout, this, &ControlManager::syncPID);
 
-    pidTimer->start(500);
+    pidTimer->start(120000);
 
     // Mensaje de finalizacion de carga
     logFile->println("Cargado");
@@ -280,6 +303,8 @@ void ControlManager::syncPID()
         frequencyDriver->start();
         frequencyDriver->setFreq(freq);
 
+        scpa->setFreq(freq);
+
         sensors->motor.velocity = freq;
         sensors->motor.voltaje = 220;
         sensors->motor.current = 70;
@@ -293,4 +318,19 @@ void ControlManager::syncPID()
         sensors->motor.voltaje = 0;
         sensors->motor.current = 0;
     }
+}
+
+void ControlManager::scpaConnected()
+{
+    logFile->println("Conexion correcta con el sistema");
+}
+
+void ControlManager::scpaErrorConnected(QAbstractSocket::SocketError error)
+{
+    logFile->println("Error de conexion con el sistema");
+}
+
+void ControlManager::scpaDisconnected()
+{
+    logFile->println("Desconexion con el sistema");
 }

@@ -18,6 +18,7 @@
 
 #include "frequencydriver.h"
 #include "pidcontroller.h"
+#include "scpa.h"
 
 using namespace hmiprotocoldata;
 
@@ -59,7 +60,7 @@ class ControlManager : public QObject
         // Archivo de logs
         LogFile *logFile = nullptr;
 
-        // Estructura de valores de sensores (simulados)
+        // Estructura de valores de sensores
         typedef struct sensors_pileta
         {
             float lvFoso = 0;
@@ -104,12 +105,20 @@ class ControlManager : public QObject
         // Controlador del sistem
         PIDController *pidController = nullptr;
 
+        // Sensor de OD
+        SCPA *scpa = nullptr;
+
         // Timer de PID
         QTimer *pidTimer = nullptr;
 
     private slots:
         // Funcion de calculo de PID
         void syncPID();
+
+        // Slot de conexion correcta del sensor de od
+        void scpaConnected();
+        void scpaErrorConnected(QTcpSocket::SocketError error);
+        void scpaDisconnected();
 };
 
 #endif // CONTROLMANAGER_H
