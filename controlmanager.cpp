@@ -45,17 +45,27 @@ void ControlManager::init()
     // Controlador del sistema
     pidController = new PIDController(this);
 
+    if (!pidController->init())
+    {
+        logFile->println("No se encontro el archivo de configuracion del controlador PID");
+    }
+
+    else
+    {
+        logFile->println("Configuracion correcta del controlador PID");
+    }
+
     // Sensor de OD
     scpa = new SCPA(this);
 
     if (!scpa->init())
     {
-        logFile->println("No se encontro el archivo de configuracion de sensor de od");
+        logFile->println("No se encontro el archivo de configuracion del sistema");
     }
 
     else
     {
-        logFile->println("Configuracion correcta del sensor de OD");
+        logFile->println("Configuracion correcta del sistema");
 
         connect(scpa, &SCPA::scpaConnected, this, &ControlManager::scpaConnected);
         connect(scpa, &SCPA::scpaErrorConnected, this, &ControlManager::scpaErrorConnected);
@@ -71,8 +81,6 @@ void ControlManager::init()
     pidTimer = new QTimer(this);
 
     connect(pidTimer, &QTimer::timeout, this, &ControlManager::syncPID);
-
-    pidTimer->start(120000);
 
     // Mensaje de finalizacion de carga
     logFile->println("Cargado");
@@ -195,12 +203,47 @@ void ControlManager::getSystemState(SystemState state)
     switch (state)
     {
         case SystemState::CONTROL_SYSTEM:
-            emit sendSystemState(state, systemState->active);
+            emit sendSystemState(SystemState::CONTROL_SYSTEM, systemState->active);
 
             break;
 
         case SystemState::SETPOINT_OD:
-            emit sendSystemState(state, systemState->od);
+            emit sendSystemState(SystemState::SETPOINT_OD, systemState->od);
+
+            break;
+
+        case SystemState::PID_ERROR:
+            emit sendSystemState(SystemState::PID_ERROR, pidController->getError());
+
+            break;
+
+        case SystemState::PID_KP:
+            emit sendSystemState(SystemState::PID_KP, pidController->getKp());
+
+            break;
+
+        case SystemState::PID_RPM_KP:
+            emit sendSystemState(SystemState::PID_RPM_KP, pidController->getRPMKp());
+
+            break;
+
+        case SystemState::PID_KD:
+            emit sendSystemState(SystemState::PID_KD, pidController->getKd());
+
+            break;
+
+        case SystemState::PID_RPM_KD:
+            emit sendSystemState(SystemState::PID_RPM_KD, pidController->getRPMKd());
+
+            break;
+
+        case SystemState::PID_KI:
+            emit sendSystemState(SystemState::PID_KI, pidController->getKi());
+
+            break;
+
+        case SystemState::PID_RPM_KI:
+            emit sendSystemState(SystemState::PID_RPM_KI, pidController->getRPMKi());
 
             break;
     }
@@ -213,11 +256,53 @@ void ControlManager::setSystemState(SystemState state, float value)
         case SystemState::CONTROL_SYSTEM:
             systemState->active = value;
 
+            if (value)
+            {
+                frequencyDriver->start();
+                pidTimer->start(100000);
+
+                syncPID();
+            }
+
+            else
+            {
+                frequencyDriver->stop();
+                pidTimer->stop();
+
+                pidController->resetPID();
+
+                // Actualizamos los valores
+                sensors->motor.velocity = 0;
+                sensors->motor.voltaje = 0;
+                sensors->motor.current = 0;
+            }
+
             break;
 
         case SystemState::SETPOINT_OD:
             systemState->od = value;
 
+            break;
+
+        case SystemState::PID_KP:
+            pidController->setKp(value);
+
+            break;
+
+        case SystemState::PID_KD:
+            pidController->setKd(value);
+
+            break;
+
+        case SystemState::PID_KI:
+            pidController->setKi(value);
+
+            break;
+
+        case SystemState::PID_ERROR:
+        case SystemState::PID_RPM_KP:
+        case SystemState::PID_RPM_KD:
+        case SystemState::PID_RPM_KI:
             break;
     }
 }
@@ -283,12 +368,47 @@ void ControlManager::getMetricSystemState(SystemState state)
     switch (state)
     {
         case SystemState::CONTROL_SYSTEM:
-            emit sendMetricSystemState(state, systemState->active);
+            emit sendMetricSystemState(SystemState::CONTROL_SYSTEM, systemState->active);
 
             break;
 
         case SystemState::SETPOINT_OD:
-            emit sendMetricSystemState(state, systemState->od);
+            emit sendMetricSystemState(SystemState::SETPOINT_OD, systemState->od);
+
+            break;
+
+        case SystemState::PID_ERROR:
+            emit sendMetricSystemState(SystemState::PID_ERROR, pidController->getError());
+
+            break;
+
+        case SystemState::PID_KP:
+            emit sendMetricSystemState(SystemState::PID_KP, pidController->getKp());
+
+            break;
+
+        case SystemState::PID_RPM_KP:
+            emit sendMetricSystemState(SystemState::PID_RPM_KP, pidController->getRPMKp());
+
+            break;
+
+        case SystemState::PID_KD:
+            emit sendMetricSystemState(SystemState::PID_KD, pidController->getKd());
+
+            break;
+
+        case SystemState::PID_RPM_KD:
+            emit sendMetricSystemState(SystemState::PID_RPM_KD, pidController->getRPMKd());
+
+            break;
+
+        case SystemState::PID_KI:
+            emit sendMetricSystemState(SystemState::PID_KI, pidController->getKi());
+
+            break;
+
+        case SystemState::PID_RPM_KI:
+            emit sendMetricSystemState(SystemState::PID_RPM_KI, pidController->getRPMKi());
 
             break;
     }
@@ -296,28 +416,23 @@ void ControlManager::getMetricSystemState(SystemState state)
 
 void ControlManager::syncPID()
 {
-    if (systemState->active)
-    {
-        uint8_t freq = pidController->getFreq(systemState->od, sensors->pileta.od, sensors->pileta.temp);
+    int8_t freqCorrection = pidController->getFreq(systemState->od, sensors->pileta.od, sensors->pileta.temp);
 
-        frequencyDriver->start();
-        frequencyDriver->setFreq(freq);
+    if (freqCorrection > 60)
+        freqCorrection = 60;
 
-        scpa->setFreq(freq);
+    else if (freqCorrection < -60)
+        freqCorrection = -60;
 
-        sensors->motor.velocity = freq;
-        sensors->motor.voltaje = 220;
-        sensors->motor.current = 70;
-    }
+    sensors->motor.velocity += freqCorrection;
+    sensors->motor.voltaje = 220.0 * sensors->motor.velocity / 50.0;
+    sensors->motor.current = 70;
 
-    else
-    {
-        frequencyDriver->stop();
+    // Establecemos el variador de frecuencia
+    frequencyDriver->setFreq(sensors->motor.velocity);
 
-        sensors->motor.velocity = 0;
-        sensors->motor.voltaje = 0;
-        sensors->motor.current = 0;
-    }
+    // Establecemos la velocidad
+    scpa->setFreq(sensors->motor.velocity);
 }
 
 void ControlManager::scpaConnected()
